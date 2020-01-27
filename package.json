@@ -3,6 +3,9 @@
   "version": "0.0.1",
   "description": "Helix Bulk Editor",
   "main": "src/index.js",
+  "bin": {
+    "1d": "src/index.js"
+  },
   "scripts": {
     "test": " nyc --reporter=text --reporter=lcov --check-coverage --branches 100 --statements 100 --lines 100 mocha",
     "test-ci": "nyc --reporter=text --reporter=lcov --check-coverage --branches 100 --statements 100 --lines 100 mocha --reporter xunit --reporter-options output=./junit/test-results.xml && codecov",
@@ -21,7 +24,14 @@
     "url": "https://github.com/tripodsan/helix-bulk-editor/issues"
   },
   "homepage": "https://github.com/tripodsan/helix-bulk-editor#readme",
-  "dependencies": {},
+  "dependencies": {
+    "@adobe/helix-log": "^4.5.0",
+    "@adobe/helix-onedrive-support": "^1.0.2",
+    "chalk": "^3.0.0",
+    "dotenv": "^8.2.0",
+    "fs-extra": "^8.1.0",
+    "yargs": "^15.1.0"
+  },
   "devDependencies": {
     "@adobe/eslint-config-helix": "1.1.0",
     "@semantic-release/changelog": "3.0.6",
