@@ -30,6 +30,12 @@
     "chalk": "^3.0.0",
     "dotenv": "^8.2.0",
     "fs-extra": "^8.1.0",
+    "klaw": "^3.0.0",
+    "remark-parse": "^7.0.2",
+    "remark-stringify": "^7.0.4",
+    "unified": "^8.4.2",
+    "unist-util-inspect": "^5.0.0",
+    "unist-util-select": "^3.0.0",
     "yargs": "^15.1.0"
   },
   "devDependencies": {

@@ -16,7 +16,8 @@
 
 const yargs = require('yargs');
 const { rootLogger } = require('@adobe/helix-log');
-const commands = require('./commands.js');
+const cmdsOneDrive = require('./cmds_onedrive.js');
+const cmdsEditor = require('./cmds_editor.js');
 
 const MIN_MSG = 'You need at least one command.';
 
@@ -37,22 +38,56 @@ class CLI {
       .command({
         command: 'me',
         desc: 'Show information about the logged in user.',
-        handler: commands.me,
+        handler: cmdsOneDrive.me,
       })
       .command({
         command: 'resolve <link>',
         desc: 'Resolves a share link to the respective drive item.',
-        handler: commands.resolve,
+        handler: cmdsOneDrive.resolve,
       })
       .command({
         command: 'ls [path]',
         desc: 'Lists the contents of the [path]',
-        handler: commands.ls,
+        handler: cmdsOneDrive.ls,
       })
       .command({
-        command: 'get path [local]',
+        command: 'extract <path>',
+        desc: 'Extract the fields of the given file(s)',
+        handler: cmdsEditor.extract,
+        builder: (y) => y
+          .positional('path', {
+            description: 'Path to the file or directory to extract.',
+          })
+          .option('json', {
+            alias: 'j',
+            type: 'boolean',
+            description: 'output as json',
+          })
+          .option('output', {
+            description: 'output file. use "-" for stdout.',
+            alias: 'o',
+            required: true,
+            default: '-',
+          }),
+      })
+      .command({
+        command: 'update <input>',
+        desc: 'Extract the fields of the given file(s)',
+        handler: cmdsEditor.update,
+        builder: (y) => y
+          .positional('input', {
+            description: 'Input file in tsv format',
+          }),
+      })
+      .command({
+        command: 'get <path> [local]',
         desc: 'downloads the file at path',
-        handler: commands.download,
+        handler: cmdsOneDrive.download,
+        builder: (y) => y.option('recursive', {
+          alias: 'r',
+          type: 'boolean',
+          description: 'Download recursively',
+        }),
       })
       .option('verbose', {
         alias: 'v',
