@@ -10,3 +10,4 @@ test-results.xml
 .env
 .hlx-blk.json
 tokens.json
+secrets/secrets.env
