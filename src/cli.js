@@ -89,6 +89,11 @@ class CLI {
           description: 'Download recursively',
         }),
       })
+      .command({
+        command: 'put <local> [path]]',
+        desc: 'upload the local file.',
+        handler: cmdsOneDrive.upload,
+      })
       .option('verbose', {
         alias: 'v',
         type: 'boolean',

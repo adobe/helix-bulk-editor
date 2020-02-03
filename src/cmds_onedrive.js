@@ -30,11 +30,17 @@ async function saveState() {
   await fs.writeJson(STATE_FILE, state);
 }
 
-function createOneDriveClient() {
+let client = null;
+
+function getOneDriveClient() {
+  if (client) {
+    return client;
+  }
   const {
-    AZURE_WORD2MD_CLIENT_ID: clientId,
-    AZURE_WORD2MD_CLIENT_SECRET: clientSecret,
-    AZURE_WORD2MD_REFRESH_TOKEN: refreshToken,
+    AZURE_APP_CLIENT_ID: clientId,
+    AZURE_APP_CLIENT_SECRET: clientSecret,
+    AZURE_APP_REFRESH_TOKEN: refreshToken = '',
+    AZURE_APP_TENANT: tenant = '',
   } = process.env;
 
   let tokens = {};
@@ -49,32 +55,31 @@ function createOneDriveClient() {
     expiresOn,
   } = tokens;
 
-  return new OneDrive({
+  client = new OneDrive({
     clientId,
     clientSecret,
     refreshToken,
+    tenant,
     accessToken,
     expiresOn,
     log: new SimpleInterface({ level: 'trace' }),
   });
-}
-
-function getAuthenticatedClient() {
-  const drive = createOneDriveClient();
-  if (!drive.authenticated) {
-    throw Error('Onedrive client is not authenticated. Login first.');
-  }
-  return drive;
+  // register event handle to write back tokens.
+  client.on('tokens', (newTokens) => {
+    fs.writeFileSync('tokens.json', JSON.stringify(newTokens, null, 2), 'utf-8');
+    info('updated "tokens.json" file.');
+  });
+  return client;
 }
 
 async function me() {
-  const od = getAuthenticatedClient();
+  const od = getOneDriveClient();
   const result = await od.me();
   info(chalk`Logged in as: {yellow ${result.displayName}} {grey (${result.mail})}`);
 }
 
 async function resolve(args) {
-  const od = getAuthenticatedClient();
+  const od = getOneDriveClient();
   const result = await od.getDriveItemFromShareLink(args.link);
   const { id, name, webUrl } = result;
   const { driveId } = result.parentReference;
@@ -111,7 +116,7 @@ async function ls(args) {
   const p = path.posix.join(state.cwd, args.path || '');
   const driveItem = await getDriveItem(state.root);
   // console.log(driveItem);
-  const od = getAuthenticatedClient();
+  const od = getOneDriveClient();
   const result = await od.listChildren(driveItem, p);
   result.value.forEach((item) => {
     let itemPath = path.posix.join(p, item.name);
@@ -200,7 +205,7 @@ async function download(args) {
     throw Error(chalk`Refusing to overwrite {yellow ${dst}}`);
   }
   const driveItem = await getDriveItem(state.root);
-  const od = getAuthenticatedClient();
+  const od = getOneDriveClient();
   if (args.recursive) {
     // get 'complete' drive item
     const result = await od.getDriveItem(driveItem, p, false);
@@ -212,9 +217,28 @@ async function download(args) {
   }
 }
 
+async function upload(args) {
+  await loadState();
+  if (!state.root) {
+    throw Error(chalk`get needs path. use '{grey ${args.$0} resolve}' to set root.`);
+  }
+  const src = path.resolve('.', args.local);
+  if (fs.lstatSync(src).isDirectory()) {
+    throw Error(chalk`Uploading a directory not supported yet.`);
+  }
+
+  const dst = path.posix.join(state.cwd, path.basename(src));
+  const driveItem = await getDriveItem(state.root);
+  const od = getOneDriveClient();
+  info(chalk`uploading {yellow ${path.relative('.', src)}} to {yellow ${dst}}`);
+  const buf = await fs.readFile(src);
+  await od.uploadDriveItem(buf, driveItem, dst);
+}
+
 module.exports = {
   me,
   resolve,
   ls,
   download,
+  upload,
 };
