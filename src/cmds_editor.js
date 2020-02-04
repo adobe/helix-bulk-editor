@@ -14,15 +14,14 @@ const path = require('path');
 const unified = require('unified');
 const remark = require('remark-parse');
 const chalk = require('chalk');
-const inspect = require('unist-util-inspect');
+// const inspect = require('unist-util-inspect');
 const { selectAll } = require('unist-util-select');
 const klaw = require('klaw');
 const stringify = require('remark-stringify');
+const csvStringify = require('csv-stringify/lib/sync');
+const csvParse = require('csv-parse/lib/sync');
 
 const { info, debug } = require('@adobe/helix-log');
-
-const trim = (s) => s.trim();
-const notEmpty = (s) => !!s;
 
 /**
  * Creates a processor that extracts and updates fields from text nodes.
@@ -35,14 +34,10 @@ function textProcessor(selector, regexp) {
       nodes.forEach((node) => {
         const match = regexp.exec(node.value || '');
         if (match) {
-          // split by comma
-          const parts = match[2].split(',')
-            .map(trim)
-            .filter(notEmpty);
-          result.push(...parts);
+          result.push(match[2]);
         }
       });
-      return result;
+      return result.join(', ');
     },
     update: (mdast, cfg, docInfo) => {
       const nodes = selectAll(selector, mdast);
@@ -129,24 +124,7 @@ async function extract(args) {
   if (args.json) {
     out.write(JSON.stringify(rows, null, 2));
   } else {
-    const delim = '\t';
-    // write header
-    const keys = Object.keys(rows[0]);
-    out.write(keys.join(delim));
-    out.write('\n');
-    rows.forEach((row) => {
-      keys.forEach((key, idx) => {
-        if (idx > 0) {
-          out.write(delim);
-        }
-        let value = row[key];
-        if (Array.isArray(value)) {
-          value = value.join(', ');
-        }
-        out.write(JSON.stringify(value));
-      });
-      out.write('\n');
-    });
+    out.write(csvStringify(rows, { header: true }));
   }
   if (out !== process.stdout) {
     out.close();
@@ -160,37 +138,16 @@ async function update(args) {
   if (table.startsWith('[')) {
     data = JSON.parse(table);
   } else {
-    const rows = table
-      .split('\n')
-      .map(trim)
-      .filter(notEmpty)
-      .map((l) => l
-        .split('\t')
-        .map(trim));
-    let keys;
-    data = [];
-    rows.forEach((row, idx) => {
-      if (idx === 0) {
-        keys = row;
-      } else {
-        const dataRow = {};
-        keys.forEach((key, i) => {
-          let value = row[i] || '';
-          if (value.startsWith('"')) {
-            value = JSON.parse(value);
-          }
-          dataRow[key] = value;
-        });
-        data.push(dataRow);
-      }
+    data = csvParse(table, {
+      columns: true,
+      skip_empty_lines: true,
     });
   }
 
-  await updateFile(data[0]);
-  // for (const row of data) {
-  //   // eslint-disable-next-line no-await-in-loop
-  //   await updateFile(row);
-  // }
+  for (const row of data) {
+    // eslint-disable-next-line no-await-in-loop
+    await updateFile(row);
+  }
 }
 
 module.exports = {

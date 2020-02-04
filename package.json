@@ -40,6 +40,8 @@
     "@adobe/openwhisk-action-utils": "^4.1.0",
     "chalk": "^3.0.0",
     "cookie-parser": "^1.4.4",
+    "csv-parse": "^4.8.5",
+    "csv-stringify": "^5.3.6",
     "dotenv": "^8.2.0",
     "express": "^4.17.1",
     "fs-extra": "^8.1.0",
