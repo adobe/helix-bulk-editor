@@ -4,7 +4,7 @@
   "description": "Helix Bulk Editor",
   "main": "src/index.js",
   "bin": {
-    "1d": "src/index_cli.js"
+    "1dbe": "src/index_cli.js"
   },
   "scripts": {
     "start": "nodemon ./test/dev/server.js",
