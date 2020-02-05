@@ -15,12 +15,14 @@ const {
   logRequest, errorHandler, asyncHandler, cacheControl, createBunyanLogger,
 } = require('@adobe/openwhisk-action-utils');
 
+const path = require('path').posix;
 const express = require('express');
 const cookieParser = require('cookie-parser');
 const pkgJson = require('../package.json');
 
 const rp = require('request-promise-native');
 const { OneDrive } = require('@adobe/helix-onedrive-support');
+const { extractFields } = require('./editor.js');
 
 class MyOneDrive extends OneDrive {
   constructor(req) {
@@ -44,7 +46,6 @@ class MyOneDrive extends OneDrive {
 
     // eslint-disable-next-line prefer-destructuring
     this.token = req.headers.authorization.split(' ')[1];
-    // console.log(this.token);
   }
 
   async getAccessToken() {
@@ -52,16 +53,74 @@ class MyOneDrive extends OneDrive {
   }
 }
 
-async function getDriveItem(url) {
+function pathToDriveItem(url) {
   // todo: parse better
   const [, , driveId, , id] = url.split('/');
   return {
     id,
+    name: '',
     parentReference: {
       driveId,
     },
   };
 }
+
+function driveItemToPath(driveItem) {
+  return `/drives/${driveItem.parentReference.driveId}/items/${driveItem.id}`;
+}
+
+
+async function processQueue(queue, fn, maxConcurrent = 8) {
+  const running = [];
+  const results = [];
+  while (queue.length || running.length) {
+    if (running.length < maxConcurrent && queue.length) {
+      const task = fn(queue.shift(), queue, results);
+      running.push(task);
+      task.finally(() => {
+        const idx = running.indexOf(task);
+        if (idx >= 0) {
+          running.splice(idx, 1);
+        }
+      });
+    } else {
+      // eslint-disable-next-line no-await-in-loop
+      await Promise.race(running);
+    }
+  }
+  return results;
+}
+
+async function extractionHandler({
+  log, od, parentPath, driveItem,
+}, queue, results) {
+  // console.log(driveItem);
+  const relPath = path.join(parentPath, driveItem.name);
+  if (driveItem.file) {
+    log.info(`downloading ${driveItem.webUrl} as ${relPath}`);
+    const result = await od.downloadDriveItem(driveItem);
+    const fields = await extractFields(result);
+    results.push({
+      itemPath: driveItemToPath(driveItem),
+      path: relPath,
+      ...fields,
+    });
+  } else if (driveItem.folder) {
+    const result = await od.listChildren(driveItem);
+    for (const childItem of result.value) {
+      queue.push({
+        log, od, parentPath: relPath, driveItem: childItem,
+      });
+    }
+  }
+}
+
+async function extractRecursively(log, od, driveItem) {
+  return processQueue([{
+    log, od, parentPath: '', driveItem,
+  }], extractionHandler);
+}
+
 
 /**
  * Handles 'GET /'
@@ -121,19 +180,63 @@ async function apiListHandler(req, res) {
       const { driveId } = result.parentReference;
       root = `/drives/${driveId}/items/${id}`;
     }
-    const rootFolder = await getDriveItem(root);
+    const rootFolder = pathToDriveItem(root);
     const result = await od.listChildren(rootFolder, '');
 
     // console.log(result);
     const value = result.value.map((item) => ({
       name: item.name,
-      itemId: `/drives/${item.parentReference.driveId}/items/${item.id}`,
+      itemPath: driveItemToPath(item),
     }));
     res
       .set('content-type', 'application/json')
       .json(value);
   } catch (e) {
-    console.log(e);
+    req.log.error(`unable to fetch list: ${e.statusCode}: ${e.message}`);
+    res.status(e.statusCode || 500);
+    res.send('error');
+  }
+}
+
+/**
+ * Handles 'GET /api/extract'
+ */
+async function apiExtractHandler(req, res) {
+  try {
+    const { root } = req.query;
+    if (!root) {
+      res
+        .set('content-type', 'application/json')
+        .json([]);
+      return;
+    }
+    const od = new MyOneDrive(req);
+    let rootFolder;
+    if (root.startsWith('https://')) {
+      // assume share link
+      rootFolder = await od.getDriveItemFromShareLink(root);
+    } else {
+      rootFolder = pathToDriveItem(root);
+      rootFolder.folder = true; // assume folder
+    }
+
+    const result = await extractRecursively(req.log, od, rootFolder);
+    // map to table - first get all keys
+    let keys = new Set();
+    result.forEach((row) => {
+      Object.keys(row).forEach((key) => (keys.add(key)));
+    });
+    keys = Array.from(keys);
+    const table = [];
+    table.push([...keys]);
+    result.forEach((row) => {
+      table.push(keys.map((key) => (row[key] || '')));
+    });
+    res
+      .set('content-type', 'application/json')
+      .json(table);
+  } catch (e) {
+    req.log.error(`unable to extract list: ${e.statusCode}: ${e.message}`);
     res.status(e.statusCode || 500);
     res.send('error');
   }
@@ -166,6 +269,7 @@ function createApp(params) {
   app.get('/api', asyncHandler(apiHandler));
   app.get('/api/me', asyncHandler(apiMeHandler));
   app.get('/api/list', asyncHandler(apiListHandler));
+  app.get('/api/extract', asyncHandler(apiExtractHandler));
 
   app.use(errorHandler(log));
 

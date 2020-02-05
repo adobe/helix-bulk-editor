@@ -11,93 +11,25 @@
  */
 const fs = require('fs-extra');
 const path = require('path');
-const unified = require('unified');
-const remark = require('remark-parse');
 const chalk = require('chalk');
-// const inspect = require('unist-util-inspect');
-const { selectAll } = require('unist-util-select');
 const klaw = require('klaw');
-const stringify = require('remark-stringify');
 const csvStringify = require('csv-stringify/lib/sync');
 const csvParse = require('csv-parse/lib/sync');
 
 const { info, debug } = require('@adobe/helix-log');
-
-/**
- * Creates a processor that extracts and updates fields from text nodes.
- */
-function textProcessor(selector, regexp) {
-  return {
-    extract: (mdast) => {
-      const result = [];
-      const nodes = selectAll(selector, mdast);
-      nodes.forEach((node) => {
-        const match = regexp.exec(node.value || '');
-        if (match) {
-          result.push(match[2]);
-        }
-      });
-      return result.join(', ');
-    },
-    update: (mdast, cfg, docInfo) => {
-      const nodes = selectAll(selector, mdast);
-      nodes.forEach((node) => {
-        const match = regexp.exec(node.value || '');
-        if (match) {
-          const newValue = docInfo[cfg.field] || '';
-          // eslint-disable-next-line no-param-reassign
-          node.value = node.value.replace(regexp, `$1${newValue}`);
-        }
-      });
-    },
-  };
-}
-
-const config = [{
-  field: 'topics',
-  processor: textProcessor('thematicBreak:last-of-type ~ paragraph > text', /^(Topics:\s*)(.*)/),
-}, {
-  field: 'products',
-  processor: textProcessor('thematicBreak:last-of-type ~ paragraph > text', /^(Products:\s*)(.*)/),
-}];
+const { extractFields, updateMarkdown } = require('../editor.js');
 
 async function extractFile(filePath) {
   const md = await fs.readFile(filePath, 'utf-8');
-  const mdast = unified()
-    .use(remark)
-    .parse(md);
-
-  const result = {
-    path: path.relative('.', filePath),
-  };
-  config.forEach((cfg) => {
-    result[cfg.field] = cfg.processor.extract(mdast);
-  });
+  const result = await extractFields(md);
+  result.path = path.relative('.', filePath);
   debug(result);
   return result;
 }
 
 async function updateFile(docInfo) {
   const md = await fs.readFile(docInfo.path, 'utf-8');
-  const mdast = unified()
-    .use(remark)
-    .parse(md);
-  config.forEach((cfg) => {
-    cfg.processor.update(mdast, cfg, docInfo);
-  });
-  // info(inspect(mdast));
-
-  const newMd = unified()
-    .use(stringify, {
-      bullet: '-',
-      fence: '`',
-      fences: true,
-      incrementListMarker: true,
-      rule: '-',
-      ruleRepetition: 3,
-      ruleSpaces: false,
-    }).stringify(mdast);
-
+  const newMd = updateMarkdown(md, docInfo);
   const filePath = `${docInfo.path}-new.md`;
   await fs.writeFile(filePath, newMd, 'utf-8');
   info(chalk`updated {yellow ${filePath}}`);
