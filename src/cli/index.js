@@ -11,8 +11,10 @@
  * OF ANY KIND, either express or implied. See the License for the specific language
  * governing permissions and limitations under the License.
  */
+const CLI = require('@adobe/helix-onedrive-cli/src/cli.js');
+const cmdsOneDrive = require('@adobe/helix-onedrive-cli/src/onedrive.cmd.js');
+const cmdsEditor = require('./editor.cmd.js');
 
-const CLI = require('./cli.js');
 require('dotenv').config();
 
-new CLI().run(process.argv.slice(2));
+new CLI([cmdsOneDrive, cmdsEditor]).run(process.argv.slice(2));
