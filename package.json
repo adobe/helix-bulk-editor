@@ -7,7 +7,7 @@
     "1dbe": "src/cli/index.js"
   },
   "scripts": {
-    "start": "nodemon ./test/dev/server.js",
+    "start": "nodemon --watch ./src ./test/dev/server.js",
     "test": " nyc --reporter=text --reporter=lcov --check-coverage --branches 100 --statements 100 --lines 100 mocha",
     "test-ci": "nyc --reporter=text --reporter=lcov --check-coverage --branches 100 --statements 100 --lines 100 mocha --reporter xunit --reporter-options output=./junit/test-results.xml && codecov",
     "lint": "./node_modules/.bin/eslint .",
@@ -20,7 +20,10 @@
     "deploy-ci": "wsk-builder -v --deploy --test=/_status_check/healthcheck.json --pkgVersion=ci$CIRCLE_BUILD_NUM -l ci"
   },
   "wsk": {
-    "name": "helix-bulk-editor@${version}"
+    "name": "helix-bulk-editor-${version}",
+    "static": [
+      ["webapp/build", "static"]
+    ]
   },
   "repository": {
     "type": "git",

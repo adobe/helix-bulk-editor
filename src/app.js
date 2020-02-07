@@ -11,17 +11,15 @@
  */
 
 /* eslint-disable no-console,no-param-reassign */
+const path = require('path').posix;
 const {
   logRequest, errorHandler, asyncHandler, cacheControl, createBunyanLogger,
 } = require('@adobe/openwhisk-action-utils');
-
-const path = require('path').posix;
+const { OneDrive } = require('@adobe/helix-onedrive-support');
 const express = require('express');
 const cookieParser = require('cookie-parser');
 const pkgJson = require('../package.json');
 
-const rp = require('request-promise-native');
-const { OneDrive } = require('@adobe/helix-onedrive-support');
 const { extractFields } = require('./editor.js');
 
 class MyOneDrive extends OneDrive {
@@ -91,44 +89,50 @@ async function processQueue(queue, fn, maxConcurrent = 8) {
   return results;
 }
 
-async function extractionHandler({
-  log, od, parentPath, driveItem,
-}, queue, results) {
-  // console.log(driveItem);
-  const relPath = path.join(parentPath, driveItem.name);
-  if (driveItem.file) {
-    log.info(`downloading ${driveItem.webUrl} as ${relPath}`);
-    const result = await od.downloadDriveItem(driveItem);
-    const fields = await extractFields(result);
-    results.push({
-      itemPath: driveItemToPath(driveItem),
-      path: relPath,
-      ...fields,
-    });
-  } else if (driveItem.folder) {
-    const result = await od.listChildren(driveItem);
-    for (const childItem of result.value) {
-      queue.push({
-        log, od, parentPath: relPath, driveItem: childItem,
+function extractionHandler(log, od) {
+  return async ({ parentPath, driveItem }, queue, results) => {
+    // console.log(driveItem);
+    const relPath = path.join(parentPath, driveItem.name);
+    if (driveItem.file) {
+      log.info(`downloading ${driveItem.webUrl} as ${relPath}`);
+      const result = await od.downloadDriveItem(driveItem);
+      const fields = await extractFields(result);
+      results.push({
+        itemPath: driveItemToPath(driveItem),
+        path: relPath,
+        ...fields,
       });
+    } else if (driveItem.folder) {
+      const result = await od.listChildren(driveItem);
+      for (const childItem of result.value) {
+        queue.push({
+          parentPath: relPath,
+          driveItem: childItem,
+        });
+      }
     }
-  }
+  };
 }
 
 async function extractRecursively(log, od, driveItem) {
-  return processQueue([{
-    log, od, parentPath: '', driveItem,
-  }], extractionHandler);
+  return processQueue([{ parentPath: '', driveItem }], extractionHandler(log, od));
 }
 
+function verifyHandler(log, od) {
+  return async (row, queue, results) => {
+    log.info('verifying', row.itemPath);
+    const driveItem = pathToDriveItem(row.itemPath);
+    const result = await od.downloadDriveItem(driveItem);
+    const fields = await extractFields(result);
+    Object.entries(fields).forEach(([key, value]) => {
+      row[`${key}_original`] = value;
+    });
+    results.push(row);
+  };
+}
 
-/**
- * Handles 'GET /'
- */
-async function indexHandler(req, res) {
-  res
-    .set('content-type', 'text/plain')
-    .send('hello');
+async function verifyChanges(log, od, table) {
+  return processQueue(table, verifyHandler(log, od));
 }
 
 /**
@@ -243,6 +247,26 @@ async function apiExtractHandler(req, res) {
 }
 
 /**
+ * Handles 'POST /api/verify'
+ */
+async function apiVerifyHandler(req, res) {
+  try {
+    const { log } = req;
+    log.info(req.body);
+    const od = new MyOneDrive(req);
+    const result = await verifyChanges(log, od, req.body);
+    result.sort((r0, r1) => r0.path.localeCompare(r1.path));
+    res
+      .set('content-type', 'application/json')
+      .json(result);
+  } catch (e) {
+    req.log.error(`unable to extract list: ${e.statusCode}: ${e.message}`);
+    res.status(e.statusCode || 500);
+    res.send('error');
+  }
+}
+
+/**
  * Handles 'GET /ping'
  */
 async function pingHandler(req, res) {
@@ -259,7 +283,13 @@ function createApp(params) {
   app.use(logRequest(log));
   app.use(cookieParser());
   app.use(cacheControl());
-  // app.use(express.static('static'));
+  app.use(express.static('static', {
+    setHeaders: (res, filePath) => {
+      if (filePath.endsWith('/index.html')) {
+        res.set('X-Frame-Options', 'sameorigin');
+      }
+    },
+  }));
   app.use(express.json());
 
   app.locals.pkgJson = pkgJson;
@@ -270,6 +300,7 @@ function createApp(params) {
   app.get('/api/me', asyncHandler(apiMeHandler));
   app.get('/api/list', asyncHandler(apiListHandler));
   app.get('/api/extract', asyncHandler(apiExtractHandler));
+  app.post('/api/verify', asyncHandler(apiVerifyHandler));
 
   app.use(errorHandler(log));
 
