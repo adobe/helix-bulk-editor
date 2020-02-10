@@ -20,7 +20,7 @@ const express = require('express');
 const cookieParser = require('cookie-parser');
 const pkgJson = require('../package.json');
 
-const { extractFields } = require('./editor.js');
+const { extractFields, updateMarkdown } = require('./editor.js');
 
 class MyOneDrive extends OneDrive {
   constructor(req) {
@@ -68,7 +68,7 @@ function driveItemToPath(driveItem) {
 }
 
 
-async function processQueue(queue, fn, maxConcurrent = 8) {
+async function processQueue(queue, fn, maxConcurrent = 100) {
   const running = [];
   const results = [];
   while (queue.length || running.length) {
@@ -94,6 +94,10 @@ function extractionHandler(log, od) {
     // console.log(driveItem);
     const relPath = path.join(parentPath, driveItem.name);
     if (driveItem.file) {
+      if (!relPath.endsWith('.md')) {
+        // skip non-md files
+        return;
+      }
       log.info(`downloading ${driveItem.webUrl} as ${relPath}`);
       const result = await od.downloadDriveItem(driveItem);
       const fields = await extractFields(result);
@@ -133,6 +137,27 @@ function verifyHandler(log, od) {
 
 async function verifyChanges(log, od, table) {
   return processQueue(table, verifyHandler(log, od));
+}
+
+function updateHandler(log, od) {
+  return async (row, queue, results) => {
+    log.info('updating', row.itemPath);
+    const driveItem = pathToDriveItem(row.itemPath);
+    const result = await od.downloadDriveItem(driveItem);
+    const updated = await updateMarkdown(result, row);
+    await od.uploadDriveItem(updated, driveItem);
+
+    // extract again
+    const fields = await extractFields(updated);
+    Object.entries(fields).forEach(([key, value]) => {
+      row[`${key}_original`] = value;
+    });
+    results.push(row);
+  };
+}
+
+async function updateChanges(log, od, table) {
+  return processQueue(table, updateHandler(log, od));
 }
 
 /**
@@ -225,20 +250,10 @@ async function apiExtractHandler(req, res) {
     }
 
     const result = await extractRecursively(req.log, od, rootFolder);
-    // map to table - first get all keys
-    let keys = new Set();
-    result.forEach((row) => {
-      Object.keys(row).forEach((key) => (keys.add(key)));
-    });
-    keys = Array.from(keys);
-    const table = [];
-    table.push([...keys]);
-    result.forEach((row) => {
-      table.push(keys.map((key) => (row[key] || '')));
-    });
+    result.sort((r0, r1) => r0.path.localeCompare(r1.path));
     res
       .set('content-type', 'application/json')
-      .json(table);
+      .json(result);
   } catch (e) {
     req.log.error(`unable to extract list: ${e.statusCode}: ${e.message}`);
     res.status(e.statusCode || 500);
@@ -261,6 +276,25 @@ async function apiVerifyHandler(req, res) {
       .json(result);
   } catch (e) {
     req.log.error(`unable to extract list: ${e.statusCode}: ${e.message}`);
+    res.status(e.statusCode || 500);
+    res.send('error');
+  }
+}
+
+/**
+ * Handles 'POST /api/update'
+ */
+async function apiUpdateHandler(req, res) {
+  try {
+    const { log } = req;
+    log.info(req.body);
+    const od = new MyOneDrive(req);
+    const result = await updateChanges(log, od, req.body);
+    res
+      .set('content-type', 'application/json')
+      .json(result);
+  } catch (e) {
+    req.log.error(`unable to update list: ${e.statusCode}: ${e.message}`);
     res.status(e.statusCode || 500);
     res.send('error');
   }
@@ -290,7 +324,7 @@ function createApp(params) {
       }
     },
   }));
-  app.use(express.json());
+  app.use(express.json({ limit: '10mb' }));
 
   app.locals.pkgJson = pkgJson;
 
@@ -301,6 +335,7 @@ function createApp(params) {
   app.get('/api/list', asyncHandler(apiListHandler));
   app.get('/api/extract', asyncHandler(apiExtractHandler));
   app.post('/api/verify', asyncHandler(apiVerifyHandler));
+  app.post('/api/update', asyncHandler(apiUpdateHandler));
 
   app.use(errorHandler(log));
 

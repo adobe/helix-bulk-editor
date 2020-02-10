@@ -17,30 +17,13 @@ import Dialog from '@react/react-spectrum/Dialog'
 import Well from '@react/react-spectrum/Well'
 import Button from '@react/react-spectrum/Button'
 import Wait from '@react/react-spectrum/Wait';
+import ModalTrigger from '@react/react-spectrum/ModalTrigger';
 import { TableView } from '@react/react-spectrum/TableView';
-import ListDataSource from '@react/react-spectrum/ListDataSource'
 import { IndexPath, IndexPathSet } from '@react/collection-view'
 import csvParse from 'csv-parse/lib/sync';
 
 import api from '../api';
-import ModalTrigger from '@react/react-spectrum/ModalTrigger';
-import PathBrowser from './PathBrowser';
-//
-class DataSource extends ListDataSource {
-  constructor(...args) {
-    super(...args);
-    this.data = [];
-  }
-
-  setData(value) {
-    this.data = value;
-    this.reloadData();
-  }
-
-  async load() {
-    return this.data;
-  }
-}
+import TableDataSource from './TableDataSource';
 
 export default class Import extends React.Component {
   constructor(props) {
@@ -55,7 +38,7 @@ export default class Import extends React.Component {
       selectedIndexPaths: new IndexPathSet(),
     };
 
-    this.ds = new DataSource([[]]);
+    this.ds = new TableDataSource([[]]);
   }
 
   resetError() {
@@ -81,6 +64,16 @@ export default class Import extends React.Component {
     });
   }
 
+  async handleVerifyTable() {
+    try {
+      await this.verifyTable();
+    } catch (e) {
+      this.setState({
+        alertText: e.message,
+      })
+    }
+  }
+
   async verifyTable() {
     const tokenResponse = await this.props.app.props.acquireToken({
       scopes: ['files.read'],
@@ -101,30 +94,12 @@ export default class Import extends React.Component {
           // Authorization: `Bearer ${tokenResponse.accessToken}`,
         },
       });
+      if (!ret.ok) {
+        throw Error(`Error while verifying table: ${ret.status} ${ret.statusText}`);
+      }
+      console.log(ret);
       const table = await ret.json();
-      this.ds.setData(table);
-      this.setState({
-        table,
-      });
-
-      // select modified rows
-      const indexPathSet = new IndexPathSet();
-      table.forEach((row, idx) => {
-        const modified = Object.keys(row).find((key) => {
-          const ori = `${key}_original`;
-          return ori in row && row[ori] !== row[key];
-        });
-        if (modified) {
-          indexPathSet.addIndexPath(new IndexPath(0, idx));
-        }
-      });
-
-      setTimeout(() => {
-        this.setState({
-          selectedIndexPaths: indexPathSet
-        });
-      }, 1);
-
+      this.setTableData(table);
     } finally {
       this.setState({
         tableLoading: false,
@@ -136,8 +111,90 @@ export default class Import extends React.Component {
     })
   }
 
-  uploadTable() {
+  setTableData(table) {
+    this.ds.setData(table);
+    this.setState({
+      table,
+    });
 
+    // select modified rows
+    const indexPathSet = new IndexPathSet();
+    table.forEach((row, idx) => {
+      const modified = Object.keys(row).find((key) => {
+        const ori = `${key}_original`;
+        return ori in row && row[ori] !== row[key];
+      });
+      if (modified) {
+        indexPathSet.addIndexPath(new IndexPath(0, idx));
+      }
+    });
+
+    setTimeout(() => {
+      this.setState({
+        selectedIndexPaths: indexPathSet
+      });
+    }, 1);
+  }
+
+  async handleUploadTable() {
+    setTimeout(async () => {
+      try {
+        await this.uploadTable();
+      } catch (e) {
+        this.setState({
+          alertText: e.message,
+        })
+      }
+    }, 1);
+  }
+
+  async uploadTable() {
+    const tokenResponse = await this.props.app.props.acquireToken({
+      scopes: ['Files.ReadWrite'],
+    });
+    if (!tokenResponse) {
+      return;
+    }
+    try {
+      // get selected rows
+      const { table, selectedIndexPaths } = this.state;
+      const selected = Array.from(selectedIndexPaths).map((indexPath) => (table[indexPath.index]));
+
+      this.setState({
+        tableLoading: true,
+      });
+      const ret = await fetch(`${api.base}/api/update`, {
+        method: 'POST',
+        body: JSON.stringify(selected),
+        headers: {
+          'content-type': 'application/json',
+          'x-ms-access-token': tokenResponse.accessToken,
+          // Authorization: `Bearer ${tokenResponse.accessToken}`,
+        },
+      });
+      if (!ret.ok) {
+        throw Error(`Error while updating table: ${ret.status} ${ret.statusText}`);
+      }
+
+      const newTable = await ret.json();
+      // update the affected rows in the current table
+      newTable.forEach((item) => {
+        const modifiedIdx = table.findIndex((row) => (row.itemPath === item.itemPath));
+        if (modifiedIdx >= 0) {
+          table.splice(modifiedIdx, 1, item);
+        }
+      });
+      this.setTableData(table);
+
+    } finally {
+      this.setState({
+        tableLoading: false,
+      })
+    }
+
+    this.setState({
+      isVerified: true,
+    })
   }
 
   handleDropCSV(evt) {
@@ -229,7 +286,7 @@ export default class Import extends React.Component {
             <>
               <Well>
                 <Button onClick={this.resetTable.bind(this)}>Reset</Button>
-                <Button onClick={this.verifyTable.bind(this)}>Verify</Button>
+                <Button onClick={this.handleVerifyTable.bind(this)}>Verify</Button>
 
                 <ModalTrigger>
                   <Button disabled={!this.state.isVerified}>Update Documents</Button>
@@ -238,7 +295,7 @@ export default class Import extends React.Component {
                     variant="confirmation"
                     confirmLabel="OK"
                     cancelLabel="Cancel"
-                    onConfirm={this.uploadTable.bind(this)}
+                    onConfirm={this.handleUploadTable.bind(this)}
                   >
                     Are you sure you want to apply those changes?
                   </Dialog>

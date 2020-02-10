@@ -9,5 +9,7 @@ logs
 test-results.xml
 .env
 .hlx-blk.json
+.hlx-1d.json
+.auth.json
 tokens.json
 secrets/secrets.env

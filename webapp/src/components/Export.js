@@ -17,8 +17,13 @@ import { Table, TD, TH, TR, TBody } from '@react/react-spectrum/Table';
 import Wait from '@react/react-spectrum/Wait';
 import csvStringify from 'csv-stringify/lib/sync';
 import PathBrowser from './PathBrowser'
+import TableDataSource from './TableDataSource';
 
 import api from '../api';
+import {IndexPathSet} from '@react/collection-view';
+import {TableView} from '@react/react-spectrum/TableView';
+
+const DEFAULT_SHARE_ROOT = 'https://adobe.sharepoint.com/sites/TheBlog/Shared%20Documents';///admin';
 
 export default class Export extends React.Component {
   constructor(props) {
@@ -27,8 +32,11 @@ export default class Export extends React.Component {
     this.state = {
       rootFolder: '',
       table: [],
+      tableColumns: [],
       tableLoading: false,
     };
+
+    this.ds = new TableDataSource([[]]);
   }
 
   handleSelectFolder(folder) {
@@ -55,10 +63,21 @@ export default class Export extends React.Component {
         },
       });
       const table = await ret.json();
+      this.ds.setData(table);
       console.log(table);
+
+      const tableColumns = [];
+      Object.keys(table[0]).forEach((key) => {
+        tableColumns.push({
+          key,
+          title: key,
+        });
+      });
+
       this.setState({
         table,
-      })
+        tableColumns,
+      });
     } finally {
       this.setState({
         tableLoading: false,
@@ -76,20 +95,14 @@ export default class Export extends React.Component {
     document.body.removeChild(a);
   }
 
-  renderTable() {
-    const { table } = this.state;
-    return table.map((row, rowIdx) => {
-      if (rowIdx === 0) {
-        return <TR key={rowIdx}>{row.map((item, idx) => (<TH key={idx}>{item}</TH>))}</TR>;
-      } else {
-        return <TR key={rowIdx}>{row.map((item, idx) => (<TD key={idx}>{item}</TD>))}</TR>;
-      }
-    });
-  }
-
   render() {
+    function renderCell(column, data) {
+      const value = data[column.key];
+      return <span className="import-table-item">{value}</span>;
+    }
+
     const enableExtract = () => (this.state.rootFolder && this.state.rootFolder.startsWith('/'));
-    const copyDefault = () => { this.setState({ rootFolder: 'https://adobe.sharepoint.com/sites/TheBlog/Shared%20Documents/theblog' })};
+    const copyDefault = () => { this.setState({ rootFolder: DEFAULT_SHARE_ROOT })};
 
     return (
       <>
@@ -113,15 +126,19 @@ export default class Export extends React.Component {
             <Button disabled={!enableExtract()} onClick={this.handleExtractClick.bind(this)} label="Extract" variant="primary" />
             <Button disabled={!this.state.table.length} onClick={this.handleCSVClick.bind(this)} label="Get CSV" variant="primary" />
             <p>
-              <em>eg: <span onClick={copyDefault}>https://adobe.sharepoint.com/sites/TheBlog/Shared%20Documents/theblog</span></em>
+              <em>eg: <span onClick={copyDefault}>{DEFAULT_SHARE_ROOT}</span></em>
             </p>
           </div>
-        </div>
-        <div className="csv-preview">
-          {this.state.tableLoading && <Wait className="csv-preview-spinner" />}
-          <Table>
-            <TBody>{this.renderTable()}</TBody>
-          </Table>
+          <div className="csv-preview">
+            {this.state.tableLoading && <Wait />}
+            <TableView
+              className="import-table"
+              dataSource={this.ds}
+              columns={this.state.tableColumns}
+              renderCell={renderCell}
+              allowsSelection={false}
+            />
+          </div>
         </div>
       </>
     )

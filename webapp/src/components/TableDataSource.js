@@ -9,10 +9,21 @@
  * OF ANY KIND, either express or implied. See the License for the specific language
  * governing permissions and limitations under the License.
  */
-const dev_base = '';
-const prod_base = '/api/v1/web/tripod/default/helix-bulk-editor-0.0.2';
+import React from 'react'
+import ListDataSource from '@react/react-spectrum/ListDataSource'
 
-export default {
-  base: dev_base,
-  loginRedirect: 'https://tripod.adobeio-static.net/helix-bulk-editor-app-0.0.2/',
+export default class DataSource extends ListDataSource {
+  constructor(...args) {
+    super(...args);
+    this.data = [];
+  }
+
+  setData(value) {
+    this.data = value;
+    this.reloadData();
+  }
+
+  async load() {
+    return this.data;
+  }
 }

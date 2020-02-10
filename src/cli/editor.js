@@ -16,20 +16,21 @@ const klaw = require('klaw');
 const csvStringify = require('csv-stringify/lib/sync');
 const csvParse = require('csv-parse/lib/sync');
 
-const { info, debug } = require('@adobe/helix-log');
+const { info } = require('@adobe/helix-log');
 const { extractFields, updateMarkdown } = require('../editor.js');
 
 async function extractFile(filePath) {
   const md = await fs.readFile(filePath, 'utf-8');
-  const result = await extractFields(md);
-  result.path = path.relative('.', filePath);
-  debug(result);
+  const result = {
+    path: path.relative('.', filePath),
+    ...(await extractFields(md)),
+  };
   return result;
 }
 
 async function updateFile(docInfo) {
   const md = await fs.readFile(docInfo.path, 'utf-8');
-  const newMd = updateMarkdown(md, docInfo);
+  const newMd = await updateMarkdown(md, docInfo);
   const filePath = `${docInfo.path}-new.md`;
   await fs.writeFile(filePath, newMd, 'utf-8');
   info(chalk`updated {yellow ${filePath}}`);
@@ -43,7 +44,7 @@ async function extract(args) {
   const rows = [];
   if (fs.lstatSync(args.path).isDirectory()) {
     for await (const file of klaw(args.path)) {
-      if (!file.stats.isDirectory()) {
+      if (!file.stats.isDirectory() && file.path.endsWith('md')) {
         rows.push(await extractFile(file.path));
       }
     }
