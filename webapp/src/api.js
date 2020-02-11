@@ -10,10 +10,12 @@
  * governing permissions and limitations under the License.
  */
 export default {
-  base: process.env.PUBLIC_URL || '',
-  logoutRedirect: process.env.PUBLIC_URL
-    ? `https://adobeioruntime.net${process.env.PUBLIC_URL}`
-    : 'https://localhost:9080/',
+  get base() {
+    const { location: loc } = window;
+    return `${loc.origin}${loc.pathname}`.replace(/\/*$/, '');
+  },
+
+  logoutRedirect: '',
 
   extract(root) {
     return `${this.base}/api/extract?root=${encodeURI(root)}`;

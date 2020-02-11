@@ -15,9 +15,10 @@
     "docs": "npx jsdoc2md -c .jsdoc.json --files 'src/*.js'  > docs/API.md",
     "commit": "git-cz",
     "build": "wsk-builder -v",
-    "deploy": "wsk-builder -v --deploy --test=/_status_check/healthcheck.json",
+    "deploy:dev": "wsk-builder -v --deploy --test=/_status_check/healthcheck.json",
+    "deploy": "npm run build:webapp && wsk-builder -v --deploy --test=/_status_check/healthcheck.json",
     "deploy-sequences": "wsk-builder --no-build -no-hints -l latest -l major -l minor",
-    "deploy-ci": "wsk-builder -v --deploy --test=/_status_check/healthcheck.json --pkgVersion=ci$CIRCLE_BUILD_NUM -l ci",
+    "deploy-ci": "npm run build:webapp && wsk-builder -v --deploy --test=/_status_check/healthcheck.json --pkgVersion=ci$CIRCLE_BUILD_NUM -l ci",
     "build:webapp": "cd webapp && npm run build"
   },
   "wsk": {

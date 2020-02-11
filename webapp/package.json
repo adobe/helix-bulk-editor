@@ -29,7 +29,7 @@
     "lint": "./node_modules/.bin/eslint ."
   },
   "proxy": "http://localhost:3000",
-  "homepage": "/api/v1/web/tripod/default/helix-bulk-editor-0.0.2/",
+  "homepage": "./",
   "browserslist": {
     "production": [
       ">0.2%",

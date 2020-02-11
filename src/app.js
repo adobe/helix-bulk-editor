@@ -328,7 +328,6 @@ function createApp(params) {
 
   app.locals.pkgJson = pkgJson;
 
-  // app.get('/', asyncHandler(indexHandler));
   app.get('/ping', asyncHandler(pingHandler));
   app.get('/api', asyncHandler(apiHandler));
   app.get('/api/me', asyncHandler(apiMeHandler));
