@@ -9,10 +9,29 @@
  * OF ANY KIND, either express or implied. See the License for the specific language
  * governing permissions and limitations under the License.
  */
-const dev_base = '';
-const prod_base = '/api/v1/web/tripod/default/helix-bulk-editor-0.0.2';
-
 export default {
-  base: dev_base,
-  loginRedirect: 'https://tripod.adobeio-static.net/helix-bulk-editor-app-0.0.2/',
-}
+  base: process.env.PUBLIC_URL || '',
+  logoutRedirect: process.env.PUBLIC_URL
+    ? `https://adobeioruntime.net${process.env.PUBLIC_URL}`
+    : 'https://localhost:9080/',
+
+  extract(root) {
+    return `${this.base}/api/extract?root=${encodeURI(root)}`;
+  },
+
+  list(root) {
+    return `${this.base}/api/list?root=${encodeURI(root)}`;
+  },
+
+  verify() {
+    return `${this.base}/api/verify`;
+  },
+
+  me() {
+    return `${this.base}/api/me`;
+  },
+
+  update() {
+    return `${this.base}/api/update`;
+  },
+};

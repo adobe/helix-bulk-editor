@@ -9,13 +9,13 @@
  * OF ANY KIND, either express or implied. See the License for the specific language
  * governing permissions and limitations under the License.
  */
-import React from 'react'
-import Breadcrumbs from '@react/react-spectrum/Breadcrumbs'
-import {TableView} from '@react/react-spectrum/TableView';
-import Folder from '@react/react-spectrum/Icon/Folder'
-import FolderListDataSource from './FolderListDataSource'
-import Dialog from '@react/react-spectrum/Dialog'
-import PropTypes from "prop-types";
+import React from 'react';
+import Breadcrumbs from '@react/react-spectrum/Breadcrumbs';
+import { TableView } from '@react/react-spectrum/TableView';
+import Folder from '@react/react-spectrum/Icon/Folder';
+import Dialog from '@react/react-spectrum/Dialog';
+import PropTypes from 'prop-types';
+import FolderListDataSource from './FolderListDataSource';
 
 export default class PathBrowser extends React.Component {
   static get propTypes() {
@@ -44,8 +44,8 @@ export default class PathBrowser extends React.Component {
        * Root folder of the path browser
        */
       rootFolder: PropTypes.string,
-    }
-  };
+    };
+  }
 
   constructor(props) {
     super(props);
@@ -63,19 +63,20 @@ export default class PathBrowser extends React.Component {
       crumbs: [{
         label: '/',
         itemPath: this.props.rootFolder,
-      }]
+      }],
     });
   }
 
-  componentDidUpdate(prevProps, prevState, snapshot) {
+  componentDidUpdate(prevProps, prevState) {
     if (this.state.rootFolder !== prevState.rootFolder) {
       this.ds.setRoot(this.state.rootFolder);
+      // eslint-disable-next-line no-console
       console.log('load folder', this.state.rootFolder);
     }
   }
 
   loadFolder(name, itemPath) {
-    const crumbs = this.state.crumbs;
+    const { crumbs } = this.state;
     const idx = crumbs.findIndex((i) => (i.itemPath === itemPath));
     if (idx >= 0) {
       crumbs.splice(idx + 1, crumbs.length - idx);
@@ -111,12 +112,12 @@ export default class PathBrowser extends React.Component {
   }
 
   render() {
-    let columns = [{
-        title: 'Name',
-        key: 'name',
-        minWidth: 400,
-        sortable: false,
-      }
+    const columns = [{
+      title: 'Name',
+      key: 'name',
+      minWidth: 400,
+      sortable: false,
+    },
     ];
 
     function renderCell(column, data) {
@@ -147,6 +148,6 @@ export default class PathBrowser extends React.Component {
           onCellClick={this.handleCellClick.bind(this)}
         />
       </Dialog>
-    )
+    );
   }
 }

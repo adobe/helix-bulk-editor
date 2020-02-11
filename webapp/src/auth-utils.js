@@ -10,26 +10,28 @@
  * governing permissions and limitations under the License.
  */
 
-import { UserAgentApplication } from "msal";
+/* eslint-disable no-console */
+
+import { UserAgentApplication } from 'msal';
 import api from './api';
 
-export const requiresInteraction = errorMessage => {
+export const requiresInteraction = (errorMessage) => {
   if (!errorMessage || !errorMessage.length) {
     return false;
   }
 
   return (
-    errorMessage.indexOf("consent_required") > -1 ||
-    errorMessage.indexOf("interaction_required") > -1 ||
-    errorMessage.indexOf("login_required") > -1
+    errorMessage.indexOf('consent_required') > -1
+    || errorMessage.indexOf('interaction_required') > -1
+    || errorMessage.indexOf('login_required') > -1
   );
 };
 
 export const fetchMsGraph = async (url, accessToken) => {
   const response = await fetch(url, {
     headers: {
-      Authorization: `Bearer ${accessToken}`
-    }
+      Authorization: `Bearer ${accessToken}`,
+    },
   });
 
   return response.json();
@@ -37,26 +39,22 @@ export const fetchMsGraph = async (url, accessToken) => {
 
 export const isIE = () => {
   const ua = window.navigator.userAgent;
-  const msie = ua.indexOf("MSIE ") > -1;
-  const msie11 = ua.indexOf("Trident/") > -1;
-
-  // If you as a developer are testing using Edge InPrivate mode, please add "isEdge" to the if check
-  // const isEdge = ua.indexOf("Edge/") > -1;
-
+  const msie = ua.indexOf('MSIE ') > -1;
+  const msie11 = ua.indexOf('Trident/') > -1;
   return msie || msie11;
 };
 
 export const GRAPH_SCOPES = {
-  OPENID: "openid",
-  PROFILE: "profile",
-  USER_READ: "User.Read",
-  FILE_READ: "files.read",
-  MAIL_READ: "Mail.Read"
+  OPENID: 'openid',
+  PROFILE: 'profile',
+  USER_READ: 'User.Read',
+  FILE_READ: 'files.read',
+  MAIL_READ: 'Mail.Read',
 };
 
 export const GRAPH_ENDPOINTS = {
-  ME: "https://graph.microsoft.com/v1.0/me",
-  MAIL: "https://graph.microsoft.com/v1.0/me/messages"
+  ME: 'https://graph.microsoft.com/v1.0/me',
+  MAIL: 'https://graph.microsoft.com/v1.0/me/messages',
 };
 
 export const GRAPH_REQUESTS = {
@@ -65,25 +63,25 @@ export const GRAPH_REQUESTS = {
       GRAPH_SCOPES.OPENID,
       GRAPH_SCOPES.PROFILE,
       GRAPH_SCOPES.USER_READ,
-      GRAPH_SCOPES.FILE_READ
-    ]
+      GRAPH_SCOPES.FILE_READ,
+    ],
   },
   EMAIL: {
-    scopes: [GRAPH_SCOPES.MAIL_READ]
-  }
+    scopes: [GRAPH_SCOPES.MAIL_READ],
+  },
 };
 
 export const msalApp = new UserAgentApplication({
   auth: {
-    clientId: "83ab2922-5f11-4e4d-96f3-d1e0ff152856",
-    authority: "https://login.microsoftonline.com/common",
+    clientId: '83ab2922-5f11-4e4d-96f3-d1e0ff152856',
+    authority: 'https://login.microsoftonline.com/common',
     validateAuthority: true,
-    postLogoutRedirectUri: api.loginRedirect,
-    navigateToLoginRequestUrl: false
+    postLogoutRedirectUri: api.logoutRedirect,
+    navigateToLoginRequestUrl: false,
   },
   cache: {
-    cacheLocation: "sessionStorage",
-    storeAuthStateInCookie: isIE()
+    cacheLocation: 'sessionStorage',
+    storeAuthStateInCookie: isIE(),
   },
   system: {
     navigateFrameWait: 0,
@@ -95,7 +93,7 @@ export const msalApp = new UserAgentApplication({
       verbose: console.log,
       verbosePii: console.log,
       warning: console.warn,
-      warningPii: console.warn
-    }
-  }
+      warningPii: console.warn,
+    },
+  },
 });

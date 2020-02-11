@@ -9,117 +9,118 @@
  * OF ANY KIND, either express or implied. See the License for the specific language
  * governing permissions and limitations under the License.
  */
-import React, { Component } from "react";
+import React, { Component } from 'react';
 import {
   msalApp,
   requiresInteraction,
   fetchMsGraph,
   isIE,
   GRAPH_ENDPOINTS,
-  GRAPH_SCOPES,
-  GRAPH_REQUESTS
-} from "./auth-utils";
+  GRAPH_REQUESTS,
+} from './auth-utils';
 
 // If you support IE, our recommendation is that you sign-in using Redirect APIs
 const useRedirectFlow = isIE();
 // const useRedirectFlow = true;
 
-export default C =>
-  class AuthProvider extends Component {
-    constructor(props) {
-      super(props);
+export default (C) => class AuthProvider extends Component {
+  constructor(props) {
+    super(props);
 
-      this.state = {
-        account: null,
-        error: null,
-        graphProfile: null
-      };
-    }
+    this.state = {
+      account: null,
+      error: null,
+      graphProfile: null,
+    };
+  }
 
-    async acquireToken(request, redirect) {
-      return msalApp.acquireTokenSilent(request).catch(error => {
-        // Call acquireTokenPopup (popup window) in case of acquireTokenSilent failure
-        // due to consent or interaction required ONLY
-        if (requiresInteraction(error.errorCode)) {
-          return redirect
-            ? msalApp.acquireTokenRedirect(request)
-            : msalApp.acquireTokenPopup(request);
-        } else {
-          console.error('Non-interactive error:', error.errorCode)
-        }
-      });
-    }
-
-    async onSignIn(redirect) {
-      if (redirect) {
-        return msalApp.loginRedirect(GRAPH_REQUESTS.LOGIN);
+  // eslint-disable-next-line class-methods-use-this
+  async acquireToken(request, redirect) {
+    return msalApp.acquireTokenSilent(request).catch((error) => {
+      // Call acquireTokenPopup (popup window) in case of acquireTokenSilent failure
+      // due to consent or interaction required ONLY
+      if (requiresInteraction(error.errorCode)) {
+        return redirect
+          ? msalApp.acquireTokenRedirect(request)
+          : msalApp.acquireTokenPopup(request);
+      } else {
+        throw Error(`Non-interactive error: ${error.errorCode}`);
       }
+    });
+  }
 
-      const loginResponse = await msalApp
-        .loginPopup(GRAPH_REQUESTS.LOGIN)
-        .catch(error => {
-          this.setState({
-            error: error.message
-          });
-        });
+  // eslint-disable-next-line consistent-return
+  async onSignIn(redirect) {
+    if (redirect) {
+      return msalApp.loginRedirect(GRAPH_REQUESTS.LOGIN);
+    }
 
-      if (loginResponse) {
+    const loginResponse = await msalApp
+      .loginPopup(GRAPH_REQUESTS.LOGIN)
+      .catch((error) => {
         this.setState({
-          account: loginResponse.account,
-          error: null
+          error: error.message,
         });
+      });
 
-        const tokenResponse = await this.acquireToken(
-          GRAPH_REQUESTS.LOGIN
-        ).catch(error => {
+    if (loginResponse) {
+      this.setState({
+        account: loginResponse.account,
+        error: null,
+      });
+
+      const tokenResponse = await this.acquireToken(
+        GRAPH_REQUESTS.LOGIN,
+      ).catch((error) => {
+        this.setState({
+          error: error.message,
+        });
+      });
+
+      if (tokenResponse) {
+        const graphProfile = await fetchMsGraph(
+          GRAPH_ENDPOINTS.ME,
+          tokenResponse.accessToken,
+        ).catch(() => {
           this.setState({
-            error: error.message
+            error: 'Unable to fetch Graph profile.',
           });
         });
 
-        if (tokenResponse) {
-          const graphProfile = await fetchMsGraph(
-            GRAPH_ENDPOINTS.ME,
-            tokenResponse.accessToken
-          ).catch(() => {
-            this.setState({
-              error: "Unable to fetch Graph profile."
-            });
+        if (graphProfile) {
+          this.setState({
+            graphProfile,
           });
-
-          if (graphProfile) {
-            this.setState({
-              graphProfile
-            });
-          }
         }
       }
     }
+  }
 
-    onSignOut() {
-      msalApp.logout();
-    }
+  // eslint-disable-next-line class-methods-use-this
+  onSignOut() {
+    msalApp.logout();
+  }
 
-    async componentDidMount() {
-      msalApp.handleRedirectCallback(error => {
-        if (error) {
-          const errorMessage = error.errorMessage ? error.errorMessage : "Unable to acquire access token.";
-          // setState works as long as navigateToLoginRequestUrl: false
-          this.setState({
-            error: errorMessage
-          });
-        }
-      });
+  async componentDidMount() {
+    msalApp.handleRedirectCallback((error) => {
+      if (error) {
+        const errorMessage = error.errorMessage ? error.errorMessage : 'Unable to acquire access token.';
+        // setState works as long as navigateToLoginRequestUrl: false
+        this.setState({
+          error: errorMessage,
+        });
+      }
+    });
 
-      const account = msalApp.getAccount();
+    const account = msalApp.getAccount();
 
-      this.setState({
-        account
-      });
-    }
+    this.setState({
+      account,
+    });
+  }
 
-    render() {
-      return (
+  render() {
+    return (
         <C
           {...this.props}
           account={this.state.account}
@@ -129,6 +130,6 @@ export default C =>
           onSignOut={() => this.onSignOut()}
           acquireToken={(request) => this.acquireToken(request, useRedirectFlow)}
         />
-      );
-    }
-  };
+    );
+  }
+};

@@ -10,7 +10,7 @@
  * governing permissions and limitations under the License.
  */
 
-import ListDataSource from '@react/react-spectrum/ListDataSource'
+import ListDataSource from '@react/react-spectrum/ListDataSource';
 import api from '../api';
 
 export default class MyAppsDataSource extends ListDataSource {
@@ -30,8 +30,9 @@ export default class MyAppsDataSource extends ListDataSource {
       return [];
     }
     // this class needs the access-token, and imsOrgId to call through to the service
-    const listUrl = `${api.base}/api/list?root=${encodeURIComponent(this.root)}`;
-    console.log('fetching from list : ' + listUrl);
+    const listUrl = api.list(this.root);
+    // eslint-disable-next-line no-console
+    console.log(`fetching from list : ${listUrl}`);
     const tokenResponse = await this.app.props.acquireToken({
       scopes: ['files.read'],
     });
@@ -47,6 +48,7 @@ export default class MyAppsDataSource extends ListDataSource {
 
     if (response.ok) {
       const ret = await response.json();
+      // eslint-disable-next-line no-console
       console.log('got', ret);
       return ret;
     }

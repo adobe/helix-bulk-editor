@@ -9,22 +9,18 @@
  * OF ANY KIND, either express or implied. See the License for the specific language
  * governing permissions and limitations under the License.
  */
-import React from 'react'
+import React from 'react';
 
-import Button from '@react/react-spectrum/Button'
-import Well from '@react/react-spectrum/Well'
+import Button from '@react/react-spectrum/Button';
+import Well from '@react/react-spectrum/Well';
 
 export default class MyApps extends React.Component {
-  constructor (props) {
-    super(props);
-  }
-
-  render () {
+  render() {
     return (
       <Well>
         <div>{this.props.me.name} ({this.props.me.userName})</div>
         <Button onClick={this.props.app.props.onSignOut}>Sign Out</Button>
       </Well>
-    )
+    );
   }
 }

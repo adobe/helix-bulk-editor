@@ -9,21 +9,19 @@
  * OF ANY KIND, either express or implied. See the License for the specific language
  * governing permissions and limitations under the License.
  */
-import React from 'react'
-import Textfield from '@react/react-spectrum/Textfield'
-import Button from '@react/react-spectrum/Button'
-import ModalTrigger from '@react/react-spectrum/ModalTrigger'
-import { Table, TD, TH, TR, TBody } from '@react/react-spectrum/Table';
+import React from 'react';
+import Textfield from '@react/react-spectrum/Textfield';
+import Button from '@react/react-spectrum/Button';
+import ModalTrigger from '@react/react-spectrum/ModalTrigger';
 import Wait from '@react/react-spectrum/Wait';
 import csvStringify from 'csv-stringify/lib/sync';
-import PathBrowser from './PathBrowser'
+import { TableView } from '@react/react-spectrum/TableView';
+import PathBrowser from './PathBrowser';
 import TableDataSource from './TableDataSource';
 
 import api from '../api';
-import {IndexPathSet} from '@react/collection-view';
-import {TableView} from '@react/react-spectrum/TableView';
 
-const DEFAULT_SHARE_ROOT = 'https://adobe.sharepoint.com/sites/TheBlog/Shared%20Documents';///admin';
+const DEFAULT_SHARE_ROOT = 'https://adobe.sharepoint.com/sites/TheBlog/Shared%20Documents';
 
 export default class Export extends React.Component {
   constructor(props) {
@@ -42,7 +40,7 @@ export default class Export extends React.Component {
   handleSelectFolder(folder) {
     this.setState({
       rootFolder: folder.itemPath,
-    })
+    });
   }
 
   async handleExtractClick() {
@@ -56,7 +54,7 @@ export default class Export extends React.Component {
       this.setState({
         tableLoading: true,
       });
-      const ret = await fetch(`${api.base}/api/extract?root=${encodeURIComponent(this.state.rootFolder)}`, {
+      const ret = await fetch(api.extract(this.state.rootFolder), {
         headers: {
           'x-ms-access-token': tokenResponse.accessToken,
           // Authorization: `Bearer ${tokenResponse.accessToken}`,
@@ -64,6 +62,7 @@ export default class Export extends React.Component {
       });
       const table = await ret.json();
       this.ds.setData(table);
+      // eslint-disable-next-line no-console
       console.log(table);
 
       const tableColumns = [];
@@ -81,14 +80,14 @@ export default class Export extends React.Component {
     } finally {
       this.setState({
         tableLoading: false,
-      })
+      });
     }
   }
 
   handleCSVClick() {
     const a = window.document.createElement('a');
     const csv = csvStringify(this.state.table, { header: true });
-    a.href = window.URL.createObjectURL(new Blob([csv], {type: 'text/csv'}));
+    a.href = window.URL.createObjectURL(new Blob([csv], { type: 'text/csv' }));
     a.download = 'helix-bulk-export.csv';
     document.body.appendChild(a);
     a.click();
@@ -102,15 +101,15 @@ export default class Export extends React.Component {
     }
 
     const enableExtract = () => (this.state.rootFolder && this.state.rootFolder.startsWith('/'));
-    const copyDefault = () => { this.setState({ rootFolder: DEFAULT_SHARE_ROOT })};
+    const copyDefault = () => (this.setState({ rootFolder: DEFAULT_SHARE_ROOT }));
 
     return (
       <>
-        <div style={{textAlign: 'center'}}>
+        <div style={{ textAlign: 'center' }}>
           <div>
             <Textfield className="share-link" id="rootFolder" name="rootFolder"
                        placeholder="Root Folder or OneDrive Share Link"
-                       onChange={(value) => this.setState({'rootFolder': value})}
+                       onChange={(value) => this.setState({ rootFolder: value })}
                        value={this.state.rootFolder}
             />
 
@@ -141,6 +140,6 @@ export default class Export extends React.Component {
           </div>
         </div>
       </>
-    )
+    );
   }
 }

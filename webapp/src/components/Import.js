@@ -9,17 +9,17 @@
  * OF ANY KIND, either express or implied. See the License for the specific language
  * governing permissions and limitations under the License.
  */
-import React from 'react'
-import IllustratedMessage from '@react/react-spectrum/IllustratedMessage'
-import DropZone from '@react/react-spectrum/DropZone'
-import Alert from '@react/react-spectrum/Alert'
-import Dialog from '@react/react-spectrum/Dialog'
-import Well from '@react/react-spectrum/Well'
-import Button from '@react/react-spectrum/Button'
+import React from 'react';
+import IllustratedMessage from '@react/react-spectrum/IllustratedMessage';
+import DropZone from '@react/react-spectrum/DropZone';
+import Alert from '@react/react-spectrum/Alert';
+import Dialog from '@react/react-spectrum/Dialog';
+import Well from '@react/react-spectrum/Well';
+import Button from '@react/react-spectrum/Button';
 import Wait from '@react/react-spectrum/Wait';
 import ModalTrigger from '@react/react-spectrum/ModalTrigger';
 import { TableView } from '@react/react-spectrum/TableView';
-import { IndexPath, IndexPathSet } from '@react/collection-view'
+import { IndexPath, IndexPathSet } from '@react/collection-view';
 import csvParse from 'csv-parse/lib/sync';
 
 import api from '../api';
@@ -44,7 +44,7 @@ export default class Import extends React.Component {
   resetError() {
     this.setState({
       alertText: '',
-    })
+    });
   }
 
   resetTable() {
@@ -55,12 +55,12 @@ export default class Import extends React.Component {
       isVerified: false,
       tableLoading: false,
       selectedIndexPaths: new IndexPathSet(),
-    })
+    });
   }
 
   handleSelectionChange(selection) {
     this.setState({
-      selectedIndexPaths: selection
+      selectedIndexPaths: selection,
     });
   }
 
@@ -70,7 +70,7 @@ export default class Import extends React.Component {
     } catch (e) {
       this.setState({
         alertText: e.message,
-      })
+      });
     }
   }
 
@@ -85,7 +85,7 @@ export default class Import extends React.Component {
       this.setState({
         tableLoading: true,
       });
-      const ret = await fetch(`${api.base}/api/verify`, {
+      const ret = await fetch(api.verify(), {
         method: 'POST',
         body: JSON.stringify(this.state.table),
         headers: {
@@ -97,18 +97,19 @@ export default class Import extends React.Component {
       if (!ret.ok) {
         throw Error(`Error while verifying table: ${ret.status} ${ret.statusText}`);
       }
+      // eslint-disable-next-line no-console
       console.log(ret);
       const table = await ret.json();
       this.setTableData(table);
     } finally {
       this.setState({
         tableLoading: false,
-      })
+      });
     }
 
     this.setState({
       isVerified: true,
-    })
+    });
   }
 
   setTableData(table) {
@@ -131,7 +132,7 @@ export default class Import extends React.Component {
 
     setTimeout(() => {
       this.setState({
-        selectedIndexPaths: indexPathSet
+        selectedIndexPaths: indexPathSet,
       });
     }, 1);
   }
@@ -143,7 +144,7 @@ export default class Import extends React.Component {
       } catch (e) {
         this.setState({
           alertText: e.message,
-        })
+        });
       }
     }, 1);
   }
@@ -163,7 +164,7 @@ export default class Import extends React.Component {
       this.setState({
         tableLoading: true,
       });
-      const ret = await fetch(`${api.base}/api/update`, {
+      const ret = await fetch(api.update(), {
         method: 'POST',
         body: JSON.stringify(selected),
         headers: {
@@ -185,16 +186,15 @@ export default class Import extends React.Component {
         }
       });
       this.setTableData(table);
-
     } finally {
       this.setState({
         tableLoading: false,
-      })
+      });
     }
 
     this.setState({
       isVerified: true,
-    })
+    });
   }
 
   handleDropCSV(evt) {
@@ -206,15 +206,17 @@ export default class Import extends React.Component {
         });
         return;
       }
+      // eslint-disable-next-line no-console
       console.log(file);
       const reader = new FileReader();
-      reader.onload = (e) => {
+      reader.onload = () => {
         const table = csvParse(reader.result, {
           columns: true,
           skip_empty_lines: true,
         });
         table.sort((r0, r1) => r0.path.localeCompare(r1.path));
         this.ds.setData(table);
+        // eslint-disable-next-line no-console
         console.log(table);
 
         const tableColumns = [];
@@ -228,7 +230,7 @@ export default class Import extends React.Component {
         this.setState({
           table,
           tableColumns,
-        })
+        });
       };
       reader.readAsText(file);
     }
@@ -257,7 +259,6 @@ export default class Import extends React.Component {
       const keyOri = `${column.key}_original`;
       const valueOri = data[keyOri] || '';
       if (keyOri in data && valueOri !== value) {
-        const valueOri = data[keyOri];
         const oldValue = valueOri ? <del>{valueOri}</del> : '';
         const newValue = value ? <ins>{value}</ins> : '';
         const sep = value && valueOri ? <br/> : '';
@@ -269,21 +270,21 @@ export default class Import extends React.Component {
 
     return (
       <>
-        <div style={{textAlign: 'center'}}>
-          {this.state.alertText &&
-          <Alert header="Error" onClose={this.resetError.bind(this)} closeLabel="Close" variant="error">
+        <div style={{ textAlign: 'center' }}>
+          {this.state.alertText
+          && <Alert header="Error" onClose={this.resetError.bind(this)} closeLabel="Close" variant="error">
             {this.state.alertText}
           </Alert>
           }
-          {this.state.table.length === 0 &&
-            <DropZone onDrop={this.handleDropCSV.bind(this)}>
+          {this.state.table.length === 0
+            && <DropZone onDrop={this.handleDropCSV.bind(this)}>
               <IllustratedMessage
                 heading="Drag and Drop Your CSV here."
                 illustration={illustration} />
             </DropZone>
           }
-          {this.state.table.length > 0 &&
-            <>
+          {this.state.table.length > 0
+            && <>
               <Well>
                 <Button onClick={this.resetTable.bind(this)}>Reset</Button>
                 <Button onClick={this.handleVerifyTable.bind(this)}>Verify</Button>
@@ -318,6 +319,6 @@ export default class Import extends React.Component {
           }
         </div>
       </>
-    )
+    );
   }
 }

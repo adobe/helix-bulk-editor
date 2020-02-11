@@ -17,10 +17,11 @@
     "build": "wsk-builder -v",
     "deploy": "wsk-builder -v --deploy --test=/_status_check/healthcheck.json",
     "deploy-sequences": "wsk-builder --no-build -no-hints -l latest -l major -l minor",
-    "deploy-ci": "wsk-builder -v --deploy --test=/_status_check/healthcheck.json --pkgVersion=ci$CIRCLE_BUILD_NUM -l ci"
+    "deploy-ci": "wsk-builder -v --deploy --test=/_status_check/healthcheck.json --pkgVersion=ci$CIRCLE_BUILD_NUM -l ci",
+    "build:webapp": "cd webapp && npm run build"
   },
   "wsk": {
-    "name": "helix-bulk-editor-${version}",
+    "name": "helix-apps/helix-bulk-editor@${version}",
     "static": [
       [
         "webapp/build",
@@ -62,7 +63,7 @@
   },
   "devDependencies": {
     "@adobe/eslint-config-helix": "1.1.0",
-    "@adobe/openwhisk-action-builder": "2.5.0",
+    "@adobe/openwhisk-action-builder": "2.6.0",
     "@semantic-release/changelog": "3.0.6",
     "@semantic-release/exec": "^5.0.0",
     "@semantic-release/git": "8.0.0",

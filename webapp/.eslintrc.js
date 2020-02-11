@@ -1,5 +1,5 @@
 /*
- * Copyright 2020 Adobe. All rights reserved.
+ * Copyright 2019 Adobe. All rights reserved.
  * This file is licensed to you under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License. You may obtain a copy
  * of the License at http://www.apache.org/licenses/LICENSE-2.0
@@ -10,15 +10,29 @@
  * governing permissions and limitations under the License.
  */
 
-import 'regenerator-runtime/runtime';
-import React from 'react';
-import ReactDOM from 'react-dom';
-import { HashRouter } from 'react-router-dom';
-import App from './App';
-
-ReactDOM.render(
-  <HashRouter>
-    <App/>
-  </HashRouter>,
-  document.getElementById('root'),
-);
+module.exports = {
+  root: true,
+  extends: '@adobe/helix',
+  parserOptions: {
+    ecmaVersion: 10,
+    sourceType: 'module',
+    ecmaFeatures: {
+      jsx: true
+    }
+  },
+  rules: {
+    "react/jsx-uses-react": "error",
+    "react/jsx-uses-vars":
+      "error"
+  },
+  plugins: [
+    "react"
+  ],
+  globals: {
+    document: true,
+    fetch: true,
+    FileReader: true,
+    window: true,
+    Blob: true,
+  }
+};
