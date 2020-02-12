@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 Adobe. All rights reserved.
+ * Copyright 2018 Adobe. All rights reserved.
  * This file is licensed to you under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License. You may obtain a copy
  * of the License at http://www.apache.org/licenses/LICENSE-2.0
@@ -9,17 +9,31 @@
  * OF ANY KIND, either express or implied. See the License for the specific language
  * governing permissions and limitations under the License.
  */
-
 /* eslint-env mocha */
-
-'use strict';
+/* eslint-disable no-console */
 
 const assert = require('assert');
-const index = require('../src/index.js').main;
+const action = require('../src/index.js');
 
-describe('Index Tests', () => {
-  it('index function is present', async () => {
-    const result = await index();
-    assert.equal(result, 'Hello, world.');
+describe('Index test', () => {
+  it('responds to ping', async () => {
+    const result = await action.main({
+      __ow_path: '/ping',
+      __ow_method: 'get',
+      __ow_headers: {},
+    });
+    delete result.headers.date;
+    delete result.headers.etag;
+    delete result.headers['x-request-id'];
+    delete result.headers['content-length'];
+    assert.deepEqual(result, {
+      body: 'PONG',
+      headers: {
+        'cache-control': 'no-store, private, must-revalidate',
+        'content-type': 'text/plain; charset=utf-8',
+        'x-powered-by': 'Express',
+      },
+      statusCode: 200,
+    });
   });
 });

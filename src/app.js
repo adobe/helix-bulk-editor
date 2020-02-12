@@ -68,7 +68,7 @@ function driveItemToPath(driveItem) {
 }
 
 
-async function processQueue(queue, fn, maxConcurrent = 100) {
+async function processQueue(queue, fn, maxConcurrent = 10) {
   const running = [];
   const results = [];
   while (queue.length || running.length) {
@@ -98,7 +98,7 @@ function extractionHandler(log, od) {
         // skip non-md files
         return;
       }
-      log.info(`downloading ${driveItem.webUrl} as ${relPath}`);
+      log.debug(`downloading ${driveItem.webUrl} as ${relPath}`);
       const result = await od.downloadDriveItem(driveItem);
       const fields = await extractFields(result);
       results.push({
@@ -124,7 +124,7 @@ async function extractRecursively(log, od, driveItem) {
 
 function verifyHandler(log, od) {
   return async (row, queue, results) => {
-    log.info('verifying', row.itemPath);
+    log.debug('verifying', row.itemPath);
     const driveItem = pathToDriveItem(row.itemPath);
     const result = await od.downloadDriveItem(driveItem);
     const fields = await extractFields(result);
@@ -141,7 +141,7 @@ async function verifyChanges(log, od, table) {
 
 function updateHandler(log, od) {
   return async (row, queue, results) => {
-    log.info('updating', row.itemPath);
+    log.debug('updating', row.itemPath);
     const driveItem = pathToDriveItem(row.itemPath);
     const result = await od.downloadDriveItem(driveItem);
     const updated = await updateMarkdown(result, row);
