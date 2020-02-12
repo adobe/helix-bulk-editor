@@ -194,6 +194,7 @@ async function apiMeHandler(req, res) {
  */
 async function apiListHandler(req, res) {
   try {
+    const { log } = req;
     let { root } = req.query;
     if (!root) {
       res
@@ -210,9 +211,9 @@ async function apiListHandler(req, res) {
       root = `/drives/${driveId}/items/${id}`;
     }
     const rootFolder = pathToDriveItem(root);
+    log.debug(`listing children of ${root}`);
     const result = await od.listChildren(rootFolder, '');
 
-    // console.log(result);
     const value = result.value.map((item) => ({
       name: item.name,
       itemPath: driveItemToPath(item),

@@ -12,6 +12,7 @@
 const { logger } = require('@adobe/openwhisk-action-logger');
 const { expressify, wrap } = require('@adobe/openwhisk-action-utils');
 const statusWrap = require('@adobe/helix-status').wrap;
+const { epsagon } = require('@adobe/helix-epsagon');
 const App = require('./app.js');
 
 /**
@@ -31,6 +32,7 @@ async function run(params) {
  * @returns {Promise<*>} The response
  */
 module.exports.main = wrap(run)
+  .with(epsagon)
   .with(logger.trace)
   .with(logger)
   .with(statusWrap, {

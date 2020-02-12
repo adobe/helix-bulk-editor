@@ -73,7 +73,7 @@ export const GRAPH_REQUESTS = {
 
 export const msalApp = new UserAgentApplication({
   auth: {
-    clientId: '83ab2922-5f11-4e4d-96f3-d1e0ff152856',
+    clientId: '9bdbc8c4-ca89-4920-a0ec-8cd0163e26e6',
     authority: 'https://login.microsoftonline.com/common',
     validateAuthority: true,
     postLogoutRedirectUri: api.logoutRedirect,
