@@ -1,3 +1,10 @@
+## [1.0.1](https://github.com/tripodsan/helix-bulk-editor/compare/v1.0.0...v1.0.1) (2020-02-13)
+
+
+### Bug Fixes
+
+* **rel:** fix release ([fa605e9](https://github.com/tripodsan/helix-bulk-editor/commit/fa605e937b800b7d8ef8e827c21d6aa74f7455fb))
+
 # 1.0.0 (2020-02-13)
 
 
