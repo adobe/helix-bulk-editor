@@ -14,6 +14,7 @@ import Textfield from '@react/react-spectrum/Textfield';
 import Button from '@react/react-spectrum/Button';
 import ModalTrigger from '@react/react-spectrum/ModalTrigger';
 import Wait from '@react/react-spectrum/Wait';
+import Well from '@react/react-spectrum/Well';
 import csvStringify from 'csv-stringify/lib/sync';
 import { TableView } from '@react/react-spectrum/TableView';
 import PathBrowser from './PathBrowser';
@@ -65,14 +66,17 @@ export default class Export extends React.Component {
       // eslint-disable-next-line no-console
       console.log(table);
 
-      const tableColumns = [{
-        key: 'path',
-        title: 'Path',
-        maxWidth: 200,
-      }, {
-        key: 'name',
-        title: 'Name',
-      }];
+      const tableColumns = [
+        {
+          key: 'name',
+          title: 'Name',
+        },
+        {
+          key: 'path',
+          title: 'Path',
+          maxWidth: 200,
+        },
+      ];
       Object.keys(table[0]).forEach((key) => {
         if (['itemPath', 'path'].indexOf(key) < 0) {
           tableColumns.push({
@@ -122,16 +126,16 @@ export default class Export extends React.Component {
 
     return (
       <>
-        <div style={{ textAlign: 'center' }}>
-          <div>
+        <Well className="export-header">
+          <div className="export-browser">
             <Textfield className="share-link" id="rootFolder" name="rootFolder"
-                       placeholder="Root Folder or OneDrive Share Link"
+                       placeholder="Paste OneDrive Share Link"
                        onChange={(value) => this.setState({ rootFolder: value })}
                        value={this.state.rootFolder}
             />
 
             <ModalTrigger>
-              <Button disabled={!this.state.rootFolder} label="Browse" variant="primary" />
+              <Button variant={enableExtract() ? 'primary' : 'cta'} disabled={!this.state.rootFolder} label="Browse"/>
               <PathBrowser
                 rootFolder={this.state.rootFolder}
                 app={this.props.app}
@@ -139,22 +143,24 @@ export default class Export extends React.Component {
                 onConfirm={this.handleSelectFolder.bind(this)}
               />
             </ModalTrigger>
-            <Button disabled={!enableExtract()} onClick={this.handleExtractClick.bind(this)} label="Extract" variant="primary" />
-            <Button disabled={!this.state.table.length} onClick={this.handleCSVClick.bind(this)} label="Get CSV" variant="primary" />
             <p>
               <em>eg: <span onClick={copyDefault}>{DEFAULT_SHARE_ROOT}</span></em>
             </p>
           </div>
-          <div className="csv-preview">
-            {this.state.tableLoading && <Wait />}
-            <TableView
-              className="import-table"
-              dataSource={this.ds}
-              columns={this.state.tableColumns}
-              renderCell={renderCell}
-              allowsSelection={false}
-            />
+          <div className="export-buttons">
+            <Button variant={this.state.table.length ? 'primary' : 'cta'} disabled={!enableExtract()} onClick={this.handleExtractClick.bind(this)} label="Extract" />
+            <Button variant={this.state.table.length ? 'cta' : 'secondary'} disabled={!this.state.table.length} onClick={this.handleCSVClick.bind(this)} label="Get CSV" />
           </div>
+        </Well>
+        <div className="csv-preview">
+          {this.state.tableLoading && <Wait />}
+          <TableView
+            className="import-table"
+            dataSource={this.ds}
+            columns={this.state.tableColumns}
+            renderCell={renderCell}
+            allowsSelection={false}
+          />
         </div>
       </>
     );

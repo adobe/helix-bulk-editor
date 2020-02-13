@@ -68,7 +68,7 @@ function driveItemToPath(driveItem) {
 }
 
 
-async function processQueue(queue, fn, maxConcurrent = 10) {
+async function processQueue(queue, fn, maxConcurrent = 50) {
   const running = [];
   const results = [];
   while (queue.length || running.length) {

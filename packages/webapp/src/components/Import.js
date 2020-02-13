@@ -197,9 +197,17 @@ export default class Import extends React.Component {
     });
   }
 
+  handleFileChange(evt) {
+    return this.loadFile(evt.nativeEvent.target.files);
+  }
+
   handleDropCSV(evt) {
-    if (evt.dataTransfer.files.length > 0) {
-      const file = evt.dataTransfer.files[0];
+    return this.loadFile(evt.dataTransfer.files);
+  }
+
+  loadFile(files) {
+    if (files.length > 0) {
+      const file = files[0];
       if (file.type !== 'text/csv') {
         this.setState({
           alertText: `Only CSV files supported. You provided ${file.type}`,
@@ -219,14 +227,17 @@ export default class Import extends React.Component {
         // eslint-disable-next-line no-console
         console.log(table);
 
-        const tableColumns = [{
-          key: 'path',
-          title: 'Path',
-          maxWidth: 180,
-        }, {
-          key: 'name',
-          title: 'Name',
-        }];
+        const tableColumns = [
+          {
+            key: 'name',
+            title: 'Name',
+          },
+          {
+            key: 'path',
+            title: 'Path',
+            maxWidth: 180,
+          },
+        ];
         Object.keys(table[0]).forEach((key) => {
           if (['itemPath', 'path'].indexOf(key) < 0) {
             tableColumns.push({
@@ -298,16 +309,19 @@ export default class Import extends React.Component {
               <IllustratedMessage
                 heading="Drag and Drop Your CSV here."
                 illustration={illustration} />
+              <p/>
+              <Button onClick={() => document.getElementById('upload').click()}>Browse</Button>
+              <input type="file" id="upload" onChange={this.handleFileChange.bind(this)} accept="text/*"/>
             </DropZone>
           }
           {this.state.table.length > 0
             && <>
               <Well style={{ textAlign: 'right' }}>
-                <Button onClick={this.resetTable.bind(this)}>Reset</Button>
-                <Button onClick={this.handleVerifyTable.bind(this)}>Verify</Button>
+                <Button variant='warning' onClick={this.resetTable.bind(this)}>Reset</Button>
+                <Button variant={this.state.isVerified ? 'primary' : 'cta'} onClick={this.handleVerifyTable.bind(this)}>Verify</Button>
 
                 <ModalTrigger>
-                  <Button disabled={!this.state.isVerified}>Update Documents</Button>
+                  <Button variant='cta' disabled={!this.state.isVerified}>Update Documents</Button>
                   <Dialog
                     title="Upload Changes"
                     variant="confirmation"

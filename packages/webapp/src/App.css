@@ -18,6 +18,22 @@
     /*width: 100%;*/
     /*height: 100%;*/
 }
+.export-header {
+    display: grid;
+    grid-template-rows: 1fr;
+    grid-template-columns: 1fr;
+}
+.export-browser {
+    grid-column: 1;
+    grid-row: 1;
+    justify-self: center;
+}
+.export-buttons {
+    grid-column: 1;
+    grid-row: 1;
+    justify-self: end;
+}
+
 .share-link {
     width: 400px;
 }
@@ -25,6 +41,7 @@
     height: 500px;
 }
 .csv-preview {
+    text-align: center;
     min-height: 50px;
 }
 .csv-preview-spinner {
@@ -52,6 +69,10 @@
 }
 .bulkeditor {
     line-height: 1em;
+}
+#upload {
+    position:absolute;
+    visibility:hidden;
 }
 iframe.tagger {
     width: 100%;
