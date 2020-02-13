@@ -26,15 +26,16 @@ export default class LoginControl extends React.Component {
   }
 
   render() {
-    return <IllustratedMessage
-      heading="Not Logged In"
-      description={
-        <>
-          <p>Please sign in to OneDrive first.</p>
-          <Button onClick={this.handleLoginClick}>Sign In</Button>
-        </>
-      }
-      illustration={<Box size="XL"/>}
-    />;
+    return (
+      <>
+        <IllustratedMessage
+          heading="Not Logged In"
+          description="Please sign in to OneDrive first."
+          illustration={<Box size="XL"/>}
+        />
+        <p/>
+        <Button onClick={this.handleLoginClick}>Sign In</Button>
+      </>
+    );
   }
 }

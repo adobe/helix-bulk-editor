@@ -47,3 +47,16 @@
     font-weight: bold;
     text-decoration: none;
 }
+.coral3-Shell-content {
+    line-height: 0;
+}
+.bulkeditor {
+    line-height: 1em;
+}
+iframe.tagger {
+    width: 100%;
+    height:100%;
+    border: 0;
+    padding: 0;
+    margin: 0;
+}

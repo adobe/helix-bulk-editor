@@ -16,17 +16,19 @@ import Alert from '@react/react-spectrum/Alert';
 import Button from '@react/react-spectrum/Button';
 import {
   Shell, ShellHeader, ShellContent, ShellActions,
+  ShellWorkspaces, ShellWorkspace,
 } from '@react/react-spectrum/Shell';
 
 import AdobeExperienceManager from '@react/react-spectrum/Icon/AdobeExperienceManager';
 import User from '@react/react-spectrum/Icon/User';
 
 import PropTypes from 'prop-types';
-import { Route, Switch, Link } from 'react-router-dom';
+import {
+  Route, Switch,
+} from 'react-router-dom';
 import AuthProvider from './AuthProvider';
-import LoginControl from './components/LoginControl';
-import Export from './components/Export';
-import Import from './components/Import';
+import Tagger from './components/Tagger';
+import BulkEditor from './components/BulkEditor';
 // import helixLogo from './assets/helix_logo.png';
 
 import './App.css';
@@ -70,37 +72,34 @@ class App extends React.Component {
       <Provider className={'App'} theme="light">
         <ErrorBoundary onError={this.onError} FallbackComponent={this.fallbackComponent}>
           <Shell>
-            <ShellHeader homeIcon={<AdobeExperienceManager/>} homeTitle="Helix Bulk Editor">
+            <ShellHeader homeIcon={<AdobeExperienceManager/>} homeTitle="Helix">
               <ShellActions>
                 <Button variant="minimal" className="coral-Shell-menu-button" icon={<User/>}
                         square>{this.props.account && this.props.account.userName}</Button>
                 {this.props.account && <Button onClick={this.props.onSignOut}>Sign Out</Button>}
               </ShellActions>
-            </ShellHeader>
-            <ShellContent>
-              <p/>
-              {!this.props.account
-              && <div style={{ textAlign: 'center' }}>
-                  <LoginControl app={this}/>
-              </div>
-              }
-              {this.props.account
-              && <>
+              <ShellWorkspaces>
                 <Switch>
-                  <Route path="/export" render={(props) => <Export {...props} app={this}/>}/>
-                  <Route path="/import" render={(props) => <Import {...props} app={this}/>}/>
-                  <Route path="/">
-                    <p>
-                      <Link className='spectrum-Link' to="/export">Export CSV Table</Link>
-                    </p>
-                    <p>
-                      <Link className='spectrum-Link' to="/import">Import CSV Table</Link>
-                    </p>
+                  <Route path="/tagger">
+                    <ShellWorkspace href="#">Bulk Editor</ShellWorkspace>
+                    <ShellWorkspace href="#/tagger" selected>Tagger</ShellWorkspace>
+                  </Route>
+                  <Route>
+                    <ShellWorkspace href="#" selected>Bulk Editor</ShellWorkspace>
+                    <ShellWorkspace href="#/tagger">Tagger</ShellWorkspace>
                   </Route>
                 </Switch>
-              </>
-              }
-
+              </ShellWorkspaces>
+            </ShellHeader>
+            <ShellContent>
+              <Switch>
+                <Route path="/tagger">
+                  <Tagger/>
+                </Route>
+                <Route>
+                  <BulkEditor app={this}/>
+                </Route>
+              </Switch>
             </ShellContent>
           </Shell>
         </ErrorBoundary>

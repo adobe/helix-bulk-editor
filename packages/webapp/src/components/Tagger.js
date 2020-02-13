@@ -9,16 +9,13 @@
  * OF ANY KIND, either express or implied. See the License for the specific language
  * governing permissions and limitations under the License.
  */
-
-import 'regenerator-runtime/runtime';
 import React from 'react';
-import ReactDOM from 'react-dom';
-import { HashRouter } from 'react-router-dom';
-import App from './App';
 
-ReactDOM.render(
-  <HashRouter>
-    <App />
-  </HashRouter>,
-  document.getElementById('root'),
-);
+export default class Tagger extends React.Component {
+  // eslint-disable-next-line class-methods-use-this
+  render() {
+    return (
+      <iframe className="tagger" src="https://theblog--davidnuescheler.hlx.page/tools/tagger/index.html" />
+    );
+  }
+}
