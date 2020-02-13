@@ -1,6 +1,7 @@
 {
   "name": "@adobe/helix-bulk-editor",
   "version": "1.0.2",
+  "private": true,
   "description": "Helix Bulk Editor",
   "main": "src/index.js",
   "bin": {
@@ -15,17 +16,20 @@
     "docs": "npx jsdoc2md -c .jsdoc.json --files 'src/*.js'  > docs/API.md",
     "commit": "git-cz",
     "build": "wsk-builder -v",
-    "deploy:dev": "wsk-builder -v --deploy --test=/_status_check/healthcheck.json",
+    "deploy:raw": "wsk-builder -v --deploy --test=/_status_check/healthcheck.json",
     "deploy": "npm run build:webapp && wsk-builder -v --deploy --test=/_status_check/healthcheck.json",
     "deploy-sequences": "wsk-builder --no-build -no-hints -l latest -l major -l minor",
     "deploy-ci": "npm run build:webapp && wsk-builder -v --deploy --test=/_status_check/healthcheck.json --pkgVersion=ci$CIRCLE_BUILD_NUM -l ci",
-    "build:webapp": "cd webapp && npm run build"
+    "build:webapp": "cd ../webapp && npm run build"
   },
   "wsk": {
     "name": "helix-apps/helix-bulk-editor@${version}",
     "namespace": "helix",
     "static": [
-      ["../webapp/build", "static"]
+      [
+        "../webapp/build",
+        "static"
+      ]
     ]
   },
   "repository": {

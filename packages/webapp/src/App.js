@@ -24,6 +24,7 @@ import User from '@react/react-spectrum/Icon/User';
 import PropTypes from 'prop-types';
 import { Route, Switch, Link } from 'react-router-dom';
 import AuthProvider from './AuthProvider';
+import LoginControl from './components/LoginControl';
 import Export from './components/Export';
 import Import from './components/Import';
 // import helixLogo from './assets/helix_logo.png';
@@ -77,9 +78,12 @@ class App extends React.Component {
               </ShellActions>
             </ShellHeader>
             <ShellContent>
-              <div style={{ textAlign: 'center' }}>
-                <p/>
+              <p/>
+              {!this.props.account
+              && <div style={{ textAlign: 'center' }}>
+                  <LoginControl app={this}/>
               </div>
+              }
               {this.props.account
               && <>
                 <Switch>
