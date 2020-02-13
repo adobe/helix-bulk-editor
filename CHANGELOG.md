@@ -1,3 +1,17 @@
+# 1.0.0 (2020-02-13)
+
+
+### Bug Fixes
+
+* **cli:** reuse cli from onedrive support ([ff77100](https://github.com/tripodsan/helix-bulk-editor/commit/ff7710045575a1e41d8bf71d7a8dcdb4a2b9d369))
+* **deps:** update [@adobe](https://github.com/adobe) ([#1](https://github.com/tripodsan/helix-bulk-editor/issues/1)) ([cbe9e43](https://github.com/tripodsan/helix-bulk-editor/commit/cbe9e4364f592f0f78568e08de5e7d59a703c5ba))
+
+
+### Features
+
+* **app:** adding initial field export ([a5dae02](https://github.com/tripodsan/helix-bulk-editor/commit/a5dae02c6156a21fe80766cb7e6a9145085b6da7))
+* **webapp:** improve UI ([5684c53](https://github.com/tripodsan/helix-bulk-editor/commit/5684c53ec7b6ac934cc108c50ea53084903b1f8d))
+
 ## [1.3.1](https://github.com/adobe/helix-library/compare/v1.3.0...v1.3.1) (2020-01-19)
 
 

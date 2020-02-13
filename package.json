@@ -1,6 +1,6 @@
 {
   "name": "@adobe/helix-bulk-editor",
-  "version": "0.0.2",
+  "version": "1.0.0",
   "description": "Helix Bulk Editor",
   "main": "src/index.js",
   "bin": {
