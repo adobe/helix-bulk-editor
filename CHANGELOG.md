@@ -1,3 +1,11 @@
+## [1.0.2](https://github.com/tripodsan/helix-bulk-editor/compare/v1.0.1...v1.0.2) (2020-02-13)
+
+
+### Bug Fixes
+
+* **release:** ensure webapp is intalled ([286f8c8](https://github.com/tripodsan/helix-bulk-editor/commit/286f8c88e10d70c583790ebb3f63f81c0b01a5aa))
+* **release:** remove webapp build again ([7ead9ae](https://github.com/tripodsan/helix-bulk-editor/commit/7ead9aec6d08f4b80f490f822bbe24a621af0d5b))
+
 ## [1.0.1](https://github.com/tripodsan/helix-bulk-editor/compare/v1.0.0...v1.0.1) (2020-02-13)
 
 
