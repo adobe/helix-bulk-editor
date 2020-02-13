@@ -69,7 +69,7 @@ class App extends React.Component {
 
   render() {
     return (
-      <Provider className={'App'} theme="light">
+      <Provider className={'App'} theme="light" scale="medium">
         <ErrorBoundary onError={this.onError} FallbackComponent={this.fallbackComponent}>
           <Shell>
             <ShellHeader homeIcon={<AdobeExperienceManager/>} homeTitle="Helix">
