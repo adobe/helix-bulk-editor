@@ -219,12 +219,21 @@ export default class Import extends React.Component {
         // eslint-disable-next-line no-console
         console.log(table);
 
-        const tableColumns = [];
+        const tableColumns = [{
+          key: 'path',
+          title: 'Path',
+          maxWidth: 180,
+        }, {
+          key: 'name',
+          title: 'Name',
+        }];
         Object.keys(table[0]).forEach((key) => {
-          tableColumns.push({
-            key,
-            title: key,
-          });
+          if (['itemPath', 'path'].indexOf(key) < 0) {
+            tableColumns.push({
+              key,
+              title: key,
+            });
+          }
         });
 
         this.setState({
@@ -255,8 +264,9 @@ export default class Import extends React.Component {
     );
 
     function renderCell(column, data) {
-      const value = data[column.key];
-      const keyOri = `${column.key}_original`;
+      const { key } = column;
+      let value = data[key] || '';
+      const keyOri = `${key}_original`;
       const valueOri = data[keyOri] || '';
       if (keyOri in data && valueOri !== value) {
         const oldValue = valueOri ? <del>{valueOri}</del> : '';
@@ -264,6 +274,13 @@ export default class Import extends React.Component {
         const sep = value && valueOri ? <br/> : '';
         return <span className="import-table-item">{oldValue}{sep}{newValue}</span>;
       } else {
+        if (key === 'name') {
+          value = data.path || '';
+          value = value.substring(value.lastIndexOf('/') + 1);
+        } else if (key === 'path') {
+          const idx = value.lastIndexOf('/');
+          value = idx < 0 ? '' : value.substring(0, idx);
+        }
         return <span className="import-table-item">{value}</span>;
       }
     }
@@ -285,7 +302,7 @@ export default class Import extends React.Component {
           }
           {this.state.table.length > 0
             && <>
-              <Well>
+              <Well style={{ textAlign: 'right' }}>
                 <Button onClick={this.resetTable.bind(this)}>Reset</Button>
                 <Button onClick={this.handleVerifyTable.bind(this)}>Verify</Button>
 

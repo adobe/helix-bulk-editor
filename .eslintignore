@@ -1,3 +1,4 @@
-.vscode/*
-coverage/*
-webapp/*
+.vscode
+coverage
+webapp
+dist
