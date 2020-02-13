@@ -65,6 +65,10 @@ jobs:
           name: Semantic Release
           command: npm run semantic-release
 
+      - run:
+          name: Link Sequences
+          command: npm run deploy-sequences
+
 workflows:
   version: 2
   build:
