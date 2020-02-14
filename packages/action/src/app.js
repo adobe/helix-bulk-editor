@@ -68,7 +68,7 @@ function driveItemToPath(driveItem) {
 }
 
 
-async function processQueue(queue, fn, maxConcurrent = 50) {
+async function processQueue(queue, fn, maxConcurrent = 100) {
   const running = [];
   const results = [];
   while (queue.length || running.length) {
@@ -268,7 +268,6 @@ async function apiExtractHandler(req, res) {
 async function apiVerifyHandler(req, res) {
   try {
     const { log } = req;
-    log.info(req.body);
     const od = new MyOneDrive(req);
     const result = await verifyChanges(log, od, req.body);
     result.sort((r0, r1) => r0.path.localeCompare(r1.path));
