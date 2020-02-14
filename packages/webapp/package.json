@@ -27,7 +27,8 @@
   "scripts": {
     "start": "PORT=9080 react-scripts start",
     "build": "npm run lint && react-scripts build",
-    "lint": "./node_modules/.bin/eslint ."
+    "lint": "./node_modules/.bin/eslint .",
+    "postinstall": "patch -fp0 < react-env.patch"
   },
   "proxy": "http://localhost:3000",
   "homepage": "./",

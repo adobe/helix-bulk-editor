@@ -1,0 +1,11 @@
++++ my_env.js
+--- node_modules/react-scripts/config/env.js	1985-10-26 01:15:00.000000000 -0700
+@@ -66,7 +66,7 @@
+
+ // Grab NODE_ENV and REACT_APP_* environment variables and prepare them to be
+ // injected into the application via DefinePlugin in Webpack configuration.
+-const REACT_APP = /^REACT_APP_/i;
++const REACT_APP = /^(REACT_APP_|SCALE_|THEME_)/i;
+
+ function getClientEnvironment(publicUrl) {
+   const raw = Object.keys(process.env)
