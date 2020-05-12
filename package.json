@@ -3,15 +3,14 @@
   "version": "1.0.0",
   "description": "Helix Bulk Editor",
   "private": true,
-  "scripts": {
-  },
+  "scripts": {},
   "repository": {
     "type": "git",
-    "url": "https://github.com/tripodsan/helix-bulk-editor"
+    "url": "https://github.com/adobe/helix-bulk-editor.git"
   },
   "license": "Apache-2.0",
   "bugs": {
-    "url": "https://github.com/tripodsan/helix-bulk-editor/issues"
+    "url": "https://github.com/adobe/helix-bulk-editor/issues"
   },
-  "homepage": "https://github.com/tripodsan/helix-bulk-editor#readme"
+  "homepage": "https://github.com/adobe/helix-bulk-editor#readme"
 }
