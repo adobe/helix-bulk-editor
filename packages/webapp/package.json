@@ -5,24 +5,24 @@
   "dependencies": {
     "@react/collection-view": "^4.1.6",
     "@react/react-spectrum": "^2.28.0",
-    "csv-parse": "^4.8.5",
-    "csv-stringify": "^5.3.6",
-    "msal": "^1.2.1",
-    "prop-types": "^15.7.2",
-    "react": "^16.9.0",
-    "react-dom": "^16.9.0",
-    "react-error-boundary": "^1.2.5",
-    "react-router-dom": "^5.1.2",
-    "regenerator-runtime": "^0.13.3"
+    "csv-parse": "4.8.5",
+    "csv-stringify": "5.3.6",
+    "msal": "1.2.1",
+    "prop-types": "15.7.2",
+    "react": "16.12.0",
+    "react-dom": "16.12.0",
+    "react-error-boundary": "1.2.5",
+    "react-router-dom": "5.1.2",
+    "regenerator-runtime": "0.13.3"
   },
   "devDependencies": {
-    "@adobe/eslint-config-helix": "^1.1.0",
-    "babel-polyfill": "^6.26.0",
+    "@adobe/eslint-config-helix": "1.1.0",
+    "babel-polyfill": "6.26.0",
     "eslint": "6.8.0",
     "eslint-plugin-header": "3.0.0",
     "eslint-plugin-import": "2.20.0",
-    "eslint-plugin-react": "^7.18.3",
-    "react-scripts": "^3.3.0"
+    "eslint-plugin-react": "7.18.3",
+    "react-scripts": "3.3.1"
   },
   "scripts": {
     "start": "PORT=9080 react-scripts start",
