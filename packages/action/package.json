@@ -50,7 +50,7 @@
     "@adobe/helix-status": "7.1.3",
     "@adobe/openwhisk-action-logger": "2.2.0",
     "@adobe/openwhisk-action-utils": "4.2.2",
-    "chalk": "4.0.0",
+    "chalk": "4.1.0",
     "cookie-parser": "1.4.5",
     "csv-parse": "4.10.1",
     "csv-stringify": "5.5.0",
@@ -59,7 +59,7 @@
     "fs-extra": "9.0.1",
     "klaw": "3.0.0",
     "remark-parse": "8.0.2",
-    "remark-stringify": "8.0.0",
+    "remark-stringify": "8.1.0",
     "unified": "9.0.0",
     "unist-util-inspect": "6.0.0",
     "unist-util-select": "3.0.1",
@@ -76,16 +76,16 @@
     "codecov": "3.7.0",
     "commitizen": "4.1.2",
     "cz-conventional-changelog": "3.2.0",
-    "eslint": "7.2.0",
+    "eslint": "7.3.1",
     "eslint-plugin-header": "3.0.0",
-    "eslint-plugin-import": "2.21.0",
+    "eslint-plugin-import": "2.21.2",
     "jsdoc-to-markdown": "6.0.1",
     "junit-report-builder": "2.0.0",
-    "lint-staged": "10.2.9",
+    "lint-staged": "10.2.11",
     "mocha": "8.0.1",
     "nodemon": "2.0.4",
     "nyc": "15.1.0",
-    "semantic-release": "17.0.8"
+    "semantic-release": "17.1.1"
   },
   "lint-staged": {
     "*.js": "eslint"
