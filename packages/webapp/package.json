@@ -20,8 +20,8 @@
     "babel-polyfill": "6.26.0",
     "eslint": "7.3.1",
     "eslint-plugin-header": "3.0.0",
-    "eslint-plugin-import": "2.21.2",
-    "eslint-plugin-react": "7.20.0",
+    "eslint-plugin-import": "2.22.0",
+    "eslint-plugin-react": "7.20.1",
     "react-scripts": "3.4.1"
   },
   "scripts": {
