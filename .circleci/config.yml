@@ -34,19 +34,19 @@ jobs:
     steps:
     - setup
     - run: mkdir junit
-    - run:
-        name: Lint
-        command: npm run lint
+    # - run:
+    #     name: Lint
+    #     command: npm run lint
 
-    - run:
-        name: Getting Code Coverage
-        command: npm run test-ci
+    # - run:
+    #     name: Getting Code Coverage
+    #     command: npm run test-ci
 
-    - store_test_results:
-        path: junit
+    # - store_test_results:
+    #     path: junit
 
-    - store_artifacts:
-        path: junit
+    # - store_artifacts:
+    #     path: junit
 
   release:
     executor: node10
