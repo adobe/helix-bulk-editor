@@ -63,7 +63,7 @@
     "unified": "9.2.0",
     "unist-util-inspect": "6.0.0",
     "unist-util-select": "3.0.1",
-    "yargs": "15.4.1"
+    "yargs": "16.0.3"
   },
   "devDependencies": {
     "@adobe/eslint-config-helix": "1.1.3",
