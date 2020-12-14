@@ -59,7 +59,7 @@
     "fs-extra": "9.0.1",
     "klaw": "3.0.0",
     "remark-parse": "9.0.0",
-    "remark-stringify": "9.0.0",
+    "remark-stringify": "9.0.1",
     "unified": "9.2.0",
     "unist-util-inspect": "6.0.1",
     "unist-util-select": "3.0.3",
