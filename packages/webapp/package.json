@@ -6,7 +6,7 @@
     "@react/collection-view": "^4.1.6",
     "@react/react-spectrum": "^2.28.0",
     "csv-parse": "4.14.2",
-    "csv-stringify": "5.5.3",
+    "csv-stringify": "5.6.0",
     "msal": "1.4.4",
     "prop-types": "15.7.2",
     "react": "17.0.1",
