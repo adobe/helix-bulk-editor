@@ -45,8 +45,8 @@
   "dependencies": {
     "@adobe/helix-epsagon": "1.5.8",
     "@adobe/helix-log": "5.0.0",
-    "@adobe/helix-onedrive-cli": "1.6.13",
-    "@adobe/helix-onedrive-support": "3.1.6",
+    "@adobe/helix-onedrive-cli": "1.6.14",
+    "@adobe/helix-onedrive-support": "3.1.7",
     "@adobe/helix-status": "9.0.6",
     "@adobe/openwhisk-action-logger": "2.4.1",
     "@adobe/openwhisk-action-utils": "4.4.1",
