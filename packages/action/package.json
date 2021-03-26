@@ -47,7 +47,7 @@
     "@adobe/helix-log": "5.0.0",
     "@adobe/helix-onedrive-cli": "1.7.2",
     "@adobe/helix-onedrive-support": "4.0.3",
-    "@adobe/helix-status": "9.1.1",
+    "@adobe/helix-status": "9.1.2",
     "@adobe/openwhisk-action-logger": "2.4.1",
     "@adobe/openwhisk-action-utils": "4.4.1",
     "chalk": "4.1.0",
