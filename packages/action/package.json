@@ -43,7 +43,7 @@
   },
   "homepage": "https://github.com/tripodsan/helix-bulk-editor#readme",
   "dependencies": {
-    "@adobe/helix-epsagon": "1.6.1",
+    "@adobe/helix-epsagon": "1.6.2",
     "@adobe/helix-log": "5.0.2",
     "@adobe/helix-onedrive-cli": "1.7.4",
     "@adobe/helix-onedrive-support": "4.0.4",
