@@ -62,7 +62,7 @@
     "remark-stringify": "9.0.1",
     "unified": "9.2.1",
     "unist-util-inspect": "7.0.0",
-    "unist-util-select": "3.0.4",
+    "unist-util-select": "4.0.0",
     "yargs": "16.2.0"
   },
   "devDependencies": {
