@@ -45,8 +45,8 @@
   "dependencies": {
     "@adobe/helix-epsagon": "1.6.7",
     "@adobe/helix-log": "5.0.3",
-    "@adobe/helix-onedrive-cli": "1.7.20",
-    "@adobe/helix-onedrive-support": "5.0.0",
+    "@adobe/helix-onedrive-cli": "1.7.21",
+    "@adobe/helix-onedrive-support": "5.0.1",
     "@adobe/helix-status": "9.1.7",
     "@adobe/openwhisk-action-logger": "2.4.4",
     "@adobe/openwhisk-action-utils": "4.4.4",
@@ -67,7 +67,7 @@
   },
   "devDependencies": {
     "@adobe/eslint-config-helix": "1.1.5",
-    "@adobe/openwhisk-action-builder": "3.0.25",
+    "@adobe/openwhisk-action-builder": "3.0.26",
     "@semantic-release/changelog": "5.0.1",
     "@semantic-release/exec": "5.0.0",
     "@semantic-release/git": "9.0.0",
